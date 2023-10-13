@@ -1,0 +1,5 @@
+description 'platon extentsion web3j'
+
+dependencies {
+    api "org.web3j:core:$web3jVersion"
+}

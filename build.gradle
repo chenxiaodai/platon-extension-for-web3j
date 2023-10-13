@@ -1,0 +1,42 @@
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'maven-publish'
+    id 'signing'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
+}
+
+ext {
+    web3jVersion = '4.9.8'
+    junitVersion = '5.5.2'
+    mockitoJunitVersion = '3.1.0'
+}
+
+subprojects {
+    apply {
+        [
+                'java',
+                'repositories',
+                'publish'
+        ].each { buildScript ->
+            from("$rootDir/gradle/$buildScript/build.gradle")
+        }
+    }
+
+    tasks.named('test', Test) {
+        useJUnitPlatform()
+    }
+
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:1.18.30'
+        annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+        testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
+        testImplementation "org.mockito:mockito-junit-jupiter:$mockitoJunitVersion"
+        testCompileOnly 'org.projectlombok:lombok:1.18.30'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+    }
+}
+
+
+

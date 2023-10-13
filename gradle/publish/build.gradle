@@ -1,0 +1,73 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+task javadocsJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+javadoc { options.encoding = 'UTF-8' }
+
+artifacts { archives sourcesJar, javadocsJar }
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocsJar
+
+            pom {
+                name = project.name
+                description.set(project.provider({ project.description }))
+                url = 'https://platon.network/'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                scm {
+                    url = "https://github.com/chenxiaodai/platon-extension-for-web3j"
+                    connection = "scm:https://github.com/chenxiaodai/platon-extension-for-web3j.git"
+                    developerConnection = "scm:git://github.com/chenxiaodai/platon-extension-for-web3j.git"
+                }
+
+                developers {
+                    developer {
+                        id = 'chendai'
+                        name = 'chendai'
+                        email = 'chenxiaodai@126.com'
+                    }
+                }
+            }
+        }
+    }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {  //only for users registered in Sonatype after 24 Feb 2021
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            username = System.getenv('OSSRH_USERNAME')
+            password = System.getenv('OSSRH_PASSWORD')
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.maven
+    def signingKey = new File("$rootDir/platon-extension-for-web3j.asc")
+    if (signingKey.exists()) {
+        useInMemoryPgpKeys(signingKey.getText('UTF-8'), System.getenv('GPG_PASSPHRASE'))
+    }
+}
