@@ -1,4 +1,4 @@
-package io.github.chenxiaodai.web3j.platon.enums;
+package io.github.chenxiaodai.web3j.platon.contracts.enums;
 
 import lombok.Getter;
 
@@ -8,7 +8,7 @@ public enum DelegateAmountTypeEnum {
     BALANCE(0),
     RESTRICTING(1),
     DELEGATE_LOCK(3);
-    private final int value;
+    int value;
     DelegateAmountTypeEnum(int val) {
         this.value = val;
     }

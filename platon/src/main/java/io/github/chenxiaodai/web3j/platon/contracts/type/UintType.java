@@ -1,12 +1,11 @@
-package io.github.chenxiaodai.web3j.platon.type;
+package io.github.chenxiaodai.web3j.platon.contracts.type;
 
 import org.web3j.rlp.RlpString;
 import org.web3j.rlp.RlpType;
-import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
-public class UintType implements Type {
+public class UintType implements Type<BigInteger> {
     private BigInteger value;
 
     public UintType(BigInteger value) {
@@ -17,8 +16,17 @@ public class UintType implements Type {
         this.value = BigInteger.valueOf(value);
     }
 
+    public UintType(Integer value) {
+        this.value = BigInteger.valueOf(value);
+    }
+
     @Override
     public RlpType getRlpType() {
         return RlpString.create(value);
+    }
+
+    @Override
+    public BigInteger getValue() {
+        return value;
     }
 }

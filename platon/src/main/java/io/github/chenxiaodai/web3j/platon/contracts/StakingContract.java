@@ -1,23 +1,35 @@
 package io.github.chenxiaodai.web3j.platon.contracts;
 
+import io.github.chenxiaodai.web3j.platon.contracts.common.Function;
 import io.github.chenxiaodai.web3j.platon.contracts.dto.CallResponse;
+import io.github.chenxiaodai.web3j.platon.contracts.dto.TransactionResponse;
 import io.github.chenxiaodai.web3j.platon.contracts.dto.resp.Node;
+import io.github.chenxiaodai.web3j.platon.contracts.enums.CreateStakingAmountTypeEnum;
+import io.github.chenxiaodai.web3j.platon.contracts.enums.DelegateAmountTypeEnum;
+import io.github.chenxiaodai.web3j.platon.contracts.type.HexStringType;
+import io.github.chenxiaodai.web3j.platon.contracts.type.StringType;
+import io.github.chenxiaodai.web3j.platon.contracts.type.Type;
+import io.github.chenxiaodai.web3j.platon.contracts.type.UintType;
+import io.github.chenxiaodai.web3j.platon.contracts.enums.IncreaseStakingAmountTypeEnum;
 import io.github.chenxiaodai.web3j.platon.enums.InnerContractEnum;
-import io.github.chenxiaodai.web3j.platon.type.HexStringType;
-import io.github.chenxiaodai.web3j.platon.type.Type;
-import io.github.chenxiaodai.web3j.platon.type.UintType;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.tx.TransactionManager;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
 public class StakingContract extends BaseContract {
 
-    public final static long FUNC_GET_CANDIDATE_INFO = 1105L;
-    public final static long FUNC_GET_CANDIDATE_LIST = 1102L;
+    public final static int FUNC_CREATE_STAKING = 1000;
+    public final static int FUNC_EDIT_CANDIDATE = 1001;
+    public final static int FUNC_INCREASE_STAKING = 1002;
+    public final static int FUNC_WITHDREW_STAKING = 1003;
+    public final static int FUNC_DELEGATE = 1004;
+    public final static int FUNC_GET_CANDIDATE_LIST = 1102;
+    public final static int FUNC_GET_CANDIDATE_INFO = 1105;
 
 	
 	/**
@@ -65,15 +77,145 @@ public class StakingContract extends BaseContract {
     }
 
     /**
+     * 发起质押
+     *
+     * @param nodeId 被质押的节点Id(也叫候选人的节点Id)
+     * @param type 表示使用账户自由金额还是账户的锁仓金额做质押，0: 自由金额； 1: 锁仓金额；2: 默认优先使用锁仓金额，当质押金额大于锁仓金额时才使用自由金额
+     * @param benefitAddress 用于接受出块奖励和质押奖励的收益账户
+     * @param rewardPer 委托所得到的奖励分成比例，采用BasePoint 1BP=0.01%，例：传500就是5%的奖励作为委托奖励
+     * @param externalId 外部Id(有长度限制，给第三方拉取节点描述的Id)
+     * @param nodeName 被质押节点的名称(有长度限制，表示该节点的名称)
+     * @param website 节点的第三方主页(有长度限制，表示该节点的主页)
+     * @param details 节点的描述(有长度限制，表示该节点的描述)
+     * @param programVersion  程序的真实版本，治理rpc获取
+     * @param programVersionSign 程序的真实版本签名，治理rpc获取
+     * @param blsPubKey bls的公钥
+     * @param blsProof bls的证明,通过拉取证明接口获取
+     * @return
+     */
+    public RemoteCall<TransactionResponse> createStaking(String nodeId, CreateStakingAmountTypeEnum type, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details, BigInteger amount, BigInteger programVersion, String programVersionSign, String blsPubKey, String blsProof) {
+        List<Type> param = Arrays.asList(
+                new UintType(type.getValue()),
+                    new HexStringType(benefitAddress),
+                new HexStringType(nodeId),
+                new StringType(externalId),
+                new StringType(nodeName),
+                new StringType(website),
+                new StringType(details),
+                new UintType(amount),
+                new UintType(rewardPer),
+                new UintType(programVersion),
+                new HexStringType(programVersionSign),
+                new HexStringType(blsPubKey),
+                new HexStringType(blsProof)
+        );
+        Function function = new Function(FUNC_CREATE_STAKING, param);
+        return executeRemoteCallTransaction(function);
+    }
+
+    /**
+     * 修改质押信息
+     *
+     * @param nodeId 被质押的节点Id(也叫候选人的节点Id)
+     * @param benefitAddress 用于接受出块奖励和质押奖励的收益账户
+     * @param rewardPer 委托所得到的奖励分成比例，采用BasePoint 1BP=0.01%，例：传500就是5%的奖励作为委托奖励
+     * @param externalId 外部Id(有长度限制，给第三方拉取节点描述的Id)
+     * @param nodeName 被质押节点的名称(有长度限制，表示该节点的名称)
+     * @param website 节点的第三方主页(有长度限制，表示该节点的主页)
+     * @param details 节点的描述(有长度限制，表示该节点的描述)
+     * @return
+     */
+    public RemoteCall<TransactionResponse> editCandidate(String nodeId, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details) {
+        List<Type> param = Arrays.asList(
+                new HexStringType(benefitAddress),
+                new HexStringType(nodeId),
+                new UintType(rewardPer),
+                new StringType(externalId),
+                new StringType(nodeName),
+                new StringType(website),
+                new StringType(details)
+        );
+        Function function = new Function(FUNC_EDIT_CANDIDATE, param);
+        return executeRemoteCallTransaction(function);
+    }
+
+    /**
+     * 增持质押
+     *
+     * @param nodeId            被质押的节点Id(也叫候选人的节点Id)
+     * @param type              表示使用账户自由金额还是账户的锁仓金额做质押，0: 自由金额； 1: 锁仓金额
+     * @param amount            增持的von
+     * @return
+     */
+    public RemoteCall<TransactionResponse> increaseStaking(String nodeId, IncreaseStakingAmountTypeEnum type, BigInteger amount) {
+        List<Type> param = Arrays.asList(
+                new HexStringType(nodeId),
+                new UintType(type.getValue()),
+                new UintType(amount)
+        );
+        Function function = new Function(FUNC_INCREASE_STAKING, param);
+        return executeRemoteCallTransaction(function);
+    }
+
+    /**
+     * 撤销质押(一次性发起全部撤销，多次到账)
+     *
+     * @param nodeId            被质押的节点Id(也叫候选人的节点Id)
+     * @return
+     */
+    public RemoteCall<TransactionResponse> withdrewStaking(String nodeId) {
+        List<Type> param = Arrays.asList(
+                new HexStringType(nodeId)
+        );
+        Function function = new Function(FUNC_WITHDREW_STAKING, param);
+        return executeRemoteCallTransaction(function);
+    }
+
+    /**
+     * 发起委托
+     *
+     * @param nodeId            委托的节点Id
+     * @param type              表示使用账户自由金额还是账户的锁仓金额做委托，0: 自由金额； 1: 锁仓金额  3:委托锁定金额
+     * @param amount            委托的金额(按照最小单位算，1LAT = 10**18 von)
+     * @return
+     */
+    public RemoteCall<TransactionResponse> delegate(String nodeId, DelegateAmountTypeEnum type, BigInteger amount) {
+        List<Type> param = Arrays.asList(
+                new UintType(type.getValue()),
+                new HexStringType(nodeId),
+                new UintType(amount)
+        );
+        Function function = new Function(FUNC_DELEGATE, param);
+        return executeRemoteCallTransaction(function);
+    }
+
+    /**
+     * 减持/撤销委托(全部减持就是撤销)
+     *
+     * @param nodeId            委托的节点Id
+     * @param type              表示使用账户自由金额还是账户的锁仓金额做委托，0: 自由金额； 1: 锁仓金额  3:委托锁定金额
+     * @param amount            委托的金额(按照最小单位算，1LAT = 10**18 von)
+     * @return
+     */
+    public RemoteCall<TransactionResponse> withdrewDelegation(String nodeId, DelegateAmountTypeEnum type, BigInteger amount) {
+        List<Type> param = Arrays.asList(
+                new UintType(type.getValue()),
+                new HexStringType(nodeId),
+                new UintType(amount)
+        );
+        Function function = new Function(FUNC_DELEGATE, param);
+        return executeRemoteCallTransaction(function);
+    }
+
+
+    /**
      * 查询所有实时的候选人列表
      *
      * @return
      */
     public RemoteCall<CallResponse<List<Node>>> getCandidateList() {
-        List<Type> param = Arrays.asList(
-                new UintType(FUNC_GET_CANDIDATE_LIST)
-        );
-        return executeRemoteCallListValueReturn(param, Node.class);
+        Function function = new Function(FUNC_GET_CANDIDATE_LIST);
+        return executeRemoteCallListValueReturn(function, Node.class);
     }
 
     /**
@@ -84,11 +226,12 @@ public class StakingContract extends BaseContract {
      */
     public RemoteCall<CallResponse<Node>> getStakingInfo(String nodeId) {
         List<Type> param = Arrays.asList(
-                new UintType(FUNC_GET_CANDIDATE_INFO),
                 new HexStringType(nodeId)
         );
-        return executeRemoteCallSingleValueReturn(param, Node.class);
+        Function function = new Function(FUNC_GET_CANDIDATE_INFO, param);
+        return executeRemoteCallSingleValueReturn(function, Node.class);
     }
+
 
 
 
