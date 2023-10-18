@@ -3,23 +3,29 @@ package io.github.chenxiaodai.web3j.platon.contracts;
 import io.github.chenxiaodai.web3j.platon.contracts.common.Function;
 import io.github.chenxiaodai.web3j.platon.contracts.dto.CallResponse;
 import io.github.chenxiaodai.web3j.platon.contracts.dto.TransactionResponse;
-import io.github.chenxiaodai.web3j.platon.contracts.dto.resp.Node;
+import io.github.chenxiaodai.web3j.platon.contracts.dto.resp.*;
 import io.github.chenxiaodai.web3j.platon.contracts.enums.CreateStakingAmountTypeEnum;
 import io.github.chenxiaodai.web3j.platon.contracts.enums.DelegateAmountTypeEnum;
+import io.github.chenxiaodai.web3j.platon.contracts.enums.IncreaseStakingAmountTypeEnum;
+import io.github.chenxiaodai.web3j.platon.contracts.enums.InnerContractEnum;
 import io.github.chenxiaodai.web3j.platon.contracts.type.HexStringType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.StringType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.Type;
 import io.github.chenxiaodai.web3j.platon.contracts.type.UintType;
-import io.github.chenxiaodai.web3j.platon.contracts.enums.IncreaseStakingAmountTypeEnum;
-import io.github.chenxiaodai.web3j.platon.enums.InnerContractEnum;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
+import org.web3j.rlp.RlpDecoder;
+import org.web3j.rlp.RlpString;
+import org.web3j.rlp.RlpType;
 import org.web3j.tx.TransactionManager;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class StakingContract extends BaseContract {
 
@@ -28,8 +34,18 @@ public class StakingContract extends BaseContract {
     public final static int FUNC_INCREASE_STAKING = 1002;
     public final static int FUNC_WITHDREW_STAKING = 1003;
     public final static int FUNC_DELEGATE = 1004;
+    public final static int FUNC_WITHDREW_DELEGATION = 1005;
+    public final static int FUNC_REDEEM_DELEGATION = 1006;
+    public final static int FUNC_GET_VERIFIER_LIST = 1100;
+    public final static int FUNC_GET_VALIDATOR_LIST = 1101;
     public final static int FUNC_GET_CANDIDATE_LIST = 1102;
+    public final static int FUNC_GET_RELATED_LIST_BY_DEL_ADDR = 1103;
+    public final static int FUNC_GET_DELEGATE_INFO = 1104;
     public final static int FUNC_GET_CANDIDATE_INFO = 1105;
+    public final static int FUNC_GET_DELEGATION_LOCK_INFO = 1106;
+    public final static int FUNC_GET_PACKAGE_REWARD = 1200;
+    public final static int FUNC_GET_STAKING_REWARD = 1201;
+    public final static int FUNC_GET_AVG_PACK_TIME = 1202;
 
 	
 	/**
@@ -193,18 +209,90 @@ public class StakingContract extends BaseContract {
      * 减持/撤销委托(全部减持就是撤销)
      *
      * @param nodeId            委托的节点Id
-     * @param type              表示使用账户自由金额还是账户的锁仓金额做委托，0: 自由金额； 1: 锁仓金额  3:委托锁定金额
-     * @param amount            委托的金额(按照最小单位算，1LAT = 10**18 von)
+     * @param stakingBlockNum   代表着某个node的某次质押的唯一标识
+     * @param amount            减持生效的委托的金额(按照最小单位算，1LAT = 10**18 von)
      * @return
      */
-    public RemoteCall<TransactionResponse> withdrewDelegation(String nodeId, DelegateAmountTypeEnum type, BigInteger amount) {
+    public RemoteCall<TransactionResponse> withdrewDelegation(String nodeId, BigInteger stakingBlockNum, BigInteger amount) {
         List<Type> param = Arrays.asList(
-                new UintType(type.getValue()),
+                new UintType(stakingBlockNum),
                 new HexStringType(nodeId),
                 new UintType(amount)
         );
-        Function function = new Function(FUNC_DELEGATE, param);
+        Function function = new Function(FUNC_WITHDREW_DELEGATION, param);
         return executeRemoteCallTransaction(function);
+    }
+
+    /**
+     * 领取解锁的委托
+     *
+     * @return
+     */
+    public RemoteCall<TransactionResponse> redeemDelegation() {
+        Function function = new Function(FUNC_REDEEM_DELEGATION);
+        return executeRemoteCallTransaction(function);
+    }
+
+    /**
+     *  获得领取解锁的委托日志（当减持/撤销委托成功时调用）
+     *
+     * @param transactionReceipt
+     * @return
+     * @throws TransactionException
+     */
+    public RedeemDelegation decodeRedeemDelegateLog(TransactionReceipt transactionReceipt) throws TransactionException {
+        List<RlpType> rlpList = decodePPOSLog(transactionReceipt);
+        RedeemDelegation result = new RedeemDelegation();
+        BigInteger released = ((RlpString) RlpDecoder.decode(((RlpString)rlpList.get(1)).getBytes()).getValues().get(0)).asPositiveBigInteger();
+        BigInteger restrictingPlan = ((RlpString) RlpDecoder.decode(((RlpString)rlpList.get(2)).getBytes()).getValues().get(0)).asPositiveBigInteger();
+        result.setReleased(released);
+        result.setRestrictingPlan(restrictingPlan);
+        return result;
+    }
+
+    /**
+     *  获得解除委托时日志信息（当减持/撤销委托成功时调用）
+     *
+     * @param transactionReceipt
+     * @return
+     * @throws TransactionException
+     */
+    public UnDelegation decodeUnDelegateLog(TransactionReceipt transactionReceipt) throws TransactionException {
+        List<RlpType> rlpList = decodePPOSLog(transactionReceipt);
+        UnDelegation result = new UnDelegation();
+        BigInteger delegateIncome = ((RlpString) RlpDecoder.decode(((RlpString)rlpList.get(1)).getBytes()).getValues().get(0)).asPositiveBigInteger();
+        result.setDelegateIncome(delegateIncome);
+        if(rlpList.size() > 2){
+            BigInteger released = ((RlpString) RlpDecoder.decode(((RlpString)rlpList.get(2)).getBytes()).getValues().get(0)).asPositiveBigInteger();
+            BigInteger restrictingPlan = ((RlpString) RlpDecoder.decode(((RlpString)rlpList.get(3)).getBytes()).getValues().get(0)).asPositiveBigInteger();
+            BigInteger lockReleased = ((RlpString) RlpDecoder.decode(((RlpString)rlpList.get(4)).getBytes()).getValues().get(0)).asPositiveBigInteger();
+            BigInteger lockRestrictingPlan =((RlpString) RlpDecoder.decode(((RlpString)rlpList.get(5)).getBytes()).getValues().get(0)).asPositiveBigInteger();
+            result.setReleased(Optional.of(released));
+            result.setRestrictingPlan(Optional.of(restrictingPlan));
+            result.setLockReleased(Optional.of(lockReleased));
+            result.setLockRestrictingPlan(Optional.of(lockRestrictingPlan));
+        }
+        return result;
+    }
+
+    /**
+     * 查询当前结算周期的验证人队列
+     *
+     * @return
+     */
+    public RemoteCall<CallResponse<List<VerifierNode>>> getVerifierList() {
+        Function function = new Function(FUNC_GET_VERIFIER_LIST);
+        return executeRemoteCallListValueReturn(function, VerifierNode.class);
+    }
+
+    /**
+     * 查询当前共识周期的验证人列表
+     *
+     * @return
+     */
+    public RemoteCall<CallResponse<List<VerifierNode>>> getValidatorList() {
+        Function function = new Function(FUNC_GET_VALIDATOR_LIST);
+        return executeRemoteCallListValueReturn(function, VerifierNode.class);
     }
 
 
@@ -213,9 +301,41 @@ public class StakingContract extends BaseContract {
      *
      * @return
      */
-    public RemoteCall<CallResponse<List<Node>>> getCandidateList() {
+    public RemoteCall<CallResponse<List<CandidateNode>>> getCandidateList() {
         Function function = new Function(FUNC_GET_CANDIDATE_LIST);
-        return executeRemoteCallListValueReturn(function, Node.class);
+        return executeRemoteCallListValueReturn(function, CandidateNode.class);
+    }
+
+    /**
+     * 查询当前账户地址所委托的节点的NodeID和质押Id
+     *
+     * @param address 委托人的账户地址
+     * @return
+     */
+    public RemoteCall<CallResponse<List<DelegationIdInfo>>> getRelatedListByDelAddr(String address) {
+        List<Type> param = Arrays.asList(
+                new HexStringType(address)
+        );
+        Function function = new Function(FUNC_GET_RELATED_LIST_BY_DEL_ADDR, param);
+        return executeRemoteCallListValueReturn(function, DelegationIdInfo.class);
+    }
+
+    /**
+     * 查询当前单个节点的委托信息
+     *
+     * @param nodeId 验证人的节点Id
+     * @param stakingBlockNum 发起质押时的区块高度
+     * @param delAddr 委托人账户地址
+     * @return
+     */
+    public RemoteCall<CallResponse<Delegation>> getDelegateInfo(String nodeId, BigInteger stakingBlockNum, String delAddr) {
+        List<Type> param = Arrays.asList(
+                new UintType(stakingBlockNum),
+                new HexStringType(delAddr),
+                new HexStringType(nodeId)
+        );
+        Function function = new Function(FUNC_GET_DELEGATE_INFO, param);
+        return executeRemoteCallSingleValueReturn(function, Delegation.class);
     }
 
     /**
@@ -224,313 +344,56 @@ public class StakingContract extends BaseContract {
      * @param nodeId
      * @return
      */
-    public RemoteCall<CallResponse<Node>> getStakingInfo(String nodeId) {
+    public RemoteCall<CallResponse<CandidateNode>> getStakingInfo(String nodeId) {
         List<Type> param = Arrays.asList(
                 new HexStringType(nodeId)
         );
         Function function = new Function(FUNC_GET_CANDIDATE_INFO, param);
-        return executeRemoteCallSingleValueReturn(function, Node.class);
+        return executeRemoteCallSingleValueReturn(function, CandidateNode.class);
+    }
+
+    /**
+     * 查询账户处于锁定期与解锁期的委托信息
+     *
+     * @param delAddr 委托人账户地址
+     * @return
+     */
+    public RemoteCall<CallResponse<DelegationLockInfo>> getDelegationLockInfo(String delAddr) {
+        List<Type> param = Arrays.asList(
+                new HexStringType(delAddr)
+        );
+        Function function = new Function(FUNC_GET_DELEGATION_LOCK_INFO, param);
+        return executeRemoteCallSingleValueReturn(function, DelegationLockInfo.class);
+    }
+
+    /**
+     * 查询当前结算周期的区块奖励
+     *
+     * @return
+     */
+    public RemoteCall<CallResponse<BigInteger>> getPackageReward() {
+        Function function = new Function(FUNC_GET_PACKAGE_REWARD);
+        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
+    }
+
+    /**
+     * 查询当前结算周期的质押奖励
+     *
+     * @return
+     */
+    public RemoteCall<CallResponse<BigInteger>> getStakingReward() {
+        Function function = new Function(FUNC_GET_STAKING_REWARD);
+        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
 
-
-
-//
-//    /**
-//     * 查询当前结算周期的区块奖励
-//     *
-//     * @return
-//     */
-//    public RemoteCall<CallResponse<BigInteger>> getPackageReward() {
-//    	Function function = new Function(FunctionType.GET_PACKAGEREWARD_FUNC_TYPE);
-//        return executeRemoteCallObjectValueReturn(function, BigInteger.class);
-//    }
-//
-//    /**
-//     * 查询当前结算周期的质押奖励
-//     *
-//     * @return
-//     */
-//    public RemoteCall<CallResponse<BigInteger>> getStakingReward() {
-//    	Function function = new Function(FunctionType.GET_STAKINGREWARD_FUNC_TYPE);
-//        return executeRemoteCallObjectValueReturn(function, BigInteger.class);
-//    }
-//
-//    /**
-//     * 查询打包区块的平均时间
-//     *
-//     * @return
-//     */
-//    public RemoteCall<CallResponse<BigInteger>> getAvgPackTime() {
-//        Function function = new Function(FunctionType.GET_AVGPACKTIME_FUNC_TYPE);
-//        return executeRemoteCallObjectValueReturn(function, BigInteger.class);
-//    }
-//
-//    /**
-//     * 发起质押
-//     *
-//     * @param stakingParam
-//     * @return
-//     * @see StakingParam
-//     */
-//    public RemoteCall<TransactionResponse> staking(StakingParam stakingParam) {
-//        Function function = createStakingFunction(stakingParam);
-//        return executeRemoteCallTransaction(function);
-//    }
-//
-//    /**
-//     * 发起质押
-//     *
-//     * @param stakingParam
-//     * @param gasProvider
-//     * @return
-//     * @see StakingParam
-//     */
-//    public RemoteCall<TransactionResponse> staking(StakingParam stakingParam, GasProvider gasProvider)  {
-//        Function function = createStakingFunction(stakingParam);
-//        return executeRemoteCallTransaction(function, gasProvider);
-//    }
-//
-//    /**
-//     * 获取质押gasProvider
-//     *
-//     * @param stakingParam
-//     * @return
-//     */
-//    public GasProvider getStakingGasProvider(StakingParam stakingParam) throws IOException, EstimateGasException, NoSupportFunctionType {
-//        Function function = createStakingFunction(stakingParam);
-//        return getDefaultGasProvider(function);
-//    }
-//
-//
-//    /**
-//     * 发起质押
-//     *
-//     * @param stakingParam
-//     * @return
-//     * @see StakingParam
-//     */
-//    public RemoteCall<PlatonSendTransaction> stakingReturnTransaction(StakingParam stakingParam)  {
-//        Function function = createStakingFunction(stakingParam);
-//        return executeRemoteCallTransactionStep1(function);
-//    }
-//
-//    /**
-//     * 发起质押
-//     *
-//     * @param stakingParam
-//     * @param gasProvider
-//     * @return
-//     * @see StakingParam
-//     */
-//    public RemoteCall<PlatonSendTransaction> stakingReturnTransaction(StakingParam stakingParam, GasProvider gasProvider) {
-//        Function function = createStakingFunction(stakingParam);
-//        return executeRemoteCallTransactionStep1(function, gasProvider);
-//    }
-//
-//    private Function createStakingFunction(StakingParam stakingParam)  {
-//        Function function = new Function(
-//                FunctionType.STAKING_FUNC_TYPE,
-//                stakingParam.getSubmitInputParameters());
-//        return function;
-//    }
-//
-//    /**
-//     * 撤销质押
-//     *
-//     * @param nodeId 64bytes 被质押的节点Id(也叫候选人的节点Id)
-//     * @return
-//     */
-//    public RemoteCall<TransactionResponse> unStaking(String nodeId) {
-//        Function function = createUnStakingFunction(nodeId);
-//        return executeRemoteCallTransaction(function);
-//    }
-//
-//    /**
-//     * 撤销质押
-//     *
-//     * @param nodeId 64bytes 被质押的节点Id(也叫候选人的节点Id)
-//     * @return
-//     */
-//    public RemoteCall<TransactionResponse> unStaking(String nodeId, GasProvider gasProvider) {
-//        Function function = createUnStakingFunction(nodeId);
-//        return executeRemoteCallTransaction(function, gasProvider);
-//    }
-//
-//    /**
-//     * 获取撤销质押的gasProvider
-//     *
-//     * @param nodeId
-//     * @return
-//     */
-//    public GasProvider getUnStakingGasProvider(String nodeId) throws IOException, EstimateGasException, NoSupportFunctionType {
-//        Function function = createUnStakingFunction(nodeId);
-//        return getDefaultGasProvider(function);
-//    }
-//
-//    /**
-//     * 撤销质押
-//     *
-//     * @param nodeId 64bytes 被质押的节点Id(也叫候选人的节点Id)
-//     * @return
-//     */
-//    public RemoteCall<PlatonSendTransaction> unStakingReturnTransaction(String nodeId) {
-//        Function function = createUnStakingFunction(nodeId);
-//        return executeRemoteCallTransactionStep1(function);
-//    }
-//
-//    /**
-//     * 撤销质押
-//     *
-//     * @param nodeId      64bytes 被质押的节点Id(也叫候选人的节点Id)
-//     * @param gasProvider 自定义的gasProvider
-//     * @return
-//     */
-//    public RemoteCall<PlatonSendTransaction> unStakingReturnTransaction(String nodeId, GasProvider gasProvider) {
-//        Function function = createUnStakingFunction(nodeId);
-//        return executeRemoteCallTransactionStep1(function, gasProvider);
-//    }
-//
-//    private Function createUnStakingFunction(String nodeId) {
-//        Function function = new Function(FunctionType.WITHDREW_STAKING_FUNC_TYPE,
-//                Arrays.asList(new BytesType(Numeric.hexStringToByteArray(nodeId))));
-//        return function;
-//    }
-//
-//    /**
-//     * 更新质押信息
-//     *
-//     * @param updateStakingParam
-//     * @return
-//     */
-//    public RemoteCall<TransactionResponse> updateStakingInfo(UpdateStakingParam updateStakingParam) {
-//        Function function = createUpdateStakingFunction(updateStakingParam);
-//        return executeRemoteCallTransaction(function);
-//    }
-//
-//    /**
-//     * 更新质押信息
-//     *
-//     * @param updateStakingParam
-//     * @param gasProvider
-//     * @return
-//     */
-//    public RemoteCall<TransactionResponse> updateStakingInfo(UpdateStakingParam updateStakingParam, GasProvider gasProvider) {
-//        Function function = createUpdateStakingFunction(updateStakingParam);
-//        return executeRemoteCallTransaction(function,gasProvider);
-//    }
-//
-//    /**
-//     * 获取更新质押信息GasProvider
-//     *
-//     * @param updateStakingParam
-//     * @return
-//     */
-//    public GasProvider getUpdateStakingInfoGasProvider(UpdateStakingParam updateStakingParam) throws IOException, EstimateGasException, NoSupportFunctionType {
-//        Function function = createUpdateStakingFunction(updateStakingParam);
-//        return getDefaultGasProvider(function);
-//    }
-//
-//    /**
-//     * 更新质押信息
-//     *
-//     * @param updateStakingParam
-//     * @return
-//     */
-//    public RemoteCall<PlatonSendTransaction> updateStakingInfoReturnTransaction(UpdateStakingParam updateStakingParam) {
-//        Function function = createUpdateStakingFunction(updateStakingParam);
-//        return executeRemoteCallTransactionStep1(function);
-//    }
-//
-//    /**
-//     * 更新质押信息
-//     *
-//     * @param updateStakingParam
-//     * @return
-//     */
-//    public RemoteCall<PlatonSendTransaction> updateStakingInfoReturnTransaction(UpdateStakingParam updateStakingParam, GasProvider gasProvider) {
-//        Function function = createUpdateStakingFunction(updateStakingParam);
-//        return executeRemoteCallTransactionStep1(function, gasProvider);
-//    }
-//
-//    private Function createUpdateStakingFunction(UpdateStakingParam updateStakingParam) {
-//        Function function = new Function(FunctionType.UPDATE_STAKING_INFO_FUNC_TYPE,
-//                updateStakingParam.getSubmitInputParameters());
-//        return function;
-//    }
-//
-//    /**
-//     * 增持质押
-//     *
-//     * @param nodeId            被质押的节点Id(也叫候选人的节点Id)
-//     * @param stakingAmountType 表示使用账户自由金额还是账户的锁仓金额做质押，0: 自由金额； 1: 锁仓金额
-//     * @param amount            增持的von
-//     * @return
-//     */
-//    public RemoteCall<TransactionResponse> addStaking(String nodeId, StakingAmountType stakingAmountType, BigInteger amount) {
-//        Function function = createAddStakingFunction(nodeId, stakingAmountType, amount);
-//        return executeRemoteCallTransaction(function);
-//    }
-//
-//    /**
-//     * 增持质押
-//     *
-//     * @param nodeId            被质押的节点Id(也叫候选人的节点Id)
-//     * @param stakingAmountType 表示使用账户自由金额还是账户的锁仓金额做质押，0: 自由金额； 1: 锁仓金额
-//     * @param amount            增持的von
-//     * @param gasProvider
-//     * @return
-//     */
-//    public RemoteCall<TransactionResponse> addStaking(String nodeId, StakingAmountType stakingAmountType, BigInteger amount, GasProvider gasProvider) {
-//        Function function = createAddStakingFunction(nodeId, stakingAmountType, amount);
-//        return executeRemoteCallTransaction(function, gasProvider);
-//    }
-//
-//    /**
-//     * 获取增持质押gasProvider
-//     *
-//     * @param nodeId
-//     * @param stakingAmountType
-//     * @param amount
-//     * @return
-//     */
-//    public GasProvider getAddStakingGasProvider(String nodeId, StakingAmountType stakingAmountType, BigInteger amount) throws IOException, EstimateGasException, NoSupportFunctionType {
-//        Function function = createAddStakingFunction(nodeId, stakingAmountType, amount);
-//        return getDefaultGasProvider(function);
-//    }
-//
-//    /**
-//     * 增持质押
-//     *
-//     * @param nodeId            被质押的节点Id(也叫候选人的节点Id)
-//     * @param stakingAmountType 表示使用账户自由金额还是账户的锁仓金额做质押，0: 自由金额； 1: 锁仓金额
-//     * @param amount            增持的von
-//     * @return
-//     */
-//    public RemoteCall<PlatonSendTransaction> addStakingReturnTransaction(String nodeId, StakingAmountType stakingAmountType, BigInteger amount) {
-//        Function function = createAddStakingFunction(nodeId, stakingAmountType, amount);
-//        return executeRemoteCallTransactionStep1(function);
-//    }
-//
-//    /**
-//     * 增持质押
-//     *
-//     * @param nodeId            被质押的节点Id(也叫候选人的节点Id)
-//     * @param stakingAmountType 表示使用账户自由金额还是账户的锁仓金额做质押，0: 自由金额； 1: 锁仓金额
-//     * @param amount            增持的von
-//     * @param gasProvider
-//     * @return
-//     */
-//    public RemoteCall<PlatonSendTransaction> addStakingReturnTransaction(String nodeId, StakingAmountType stakingAmountType, BigInteger amount, GasProvider gasProvider) {
-//        Function function = createAddStakingFunction(nodeId, stakingAmountType, amount );
-//        return executeRemoteCallTransactionStep1(function, gasProvider);
-//    }
-//
-//    private Function createAddStakingFunction(String nodeId, StakingAmountType stakingAmountType, BigInteger amount) {
-//        Function function = new Function(FunctionType.ADD_STAKING_FUNC_TYPE,
-//                Arrays.asList(new BytesType(Numeric.hexStringToByteArray(nodeId)),
-//                        new Uint16(stakingAmountType.getValue()),
-//                        new Uint256(amount)));
-//        return function;
-//    }
+    /**
+     * 查询当前结算周期的质押奖励
+     *
+     * @return
+     */
+    public RemoteCall<CallResponse<Integer>> getAvgPackTime() {
+        Function function = new Function(FUNC_GET_AVG_PACK_TIME);
+        return executeRemoteCallSingleValueReturn(function, Integer.class);
+    }
 }

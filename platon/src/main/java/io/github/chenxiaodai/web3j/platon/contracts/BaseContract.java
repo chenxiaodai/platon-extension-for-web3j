@@ -130,6 +130,28 @@ public abstract class BaseContract extends ManagedTransaction {
         return transactionResponse;
     }
 
+    protected List<RlpType> decodePPOSLog(TransactionReceipt transactionReceipt) throws TransactionException {
+        List<Log> logs = transactionReceipt.getLogs();
+        if(logs==null||logs.isEmpty()){
+            throw new TransactionException("TransactionReceipt logs is empty");
+        }
+
+        String logData = logs.get(0).getData();
+        if(null == logData || "".equals(logData) ){
+            throw new TransactionException("TransactionReceipt logs[0].data is empty");
+        }
+
+        RlpList rlp = RlpDecoder.decode(Numeric.hexStringToByteArray(logData));
+        List<RlpType> rlpList = ((RlpList)(rlp.getValues().get(0))).getValues();
+        String decodedStatus = new String(((RlpString)rlpList.get(0)).getBytes());
+        int statusCode = Integer.parseInt(decodedStatus);
+
+        if(statusCode != ErrorCode.SUCCESS){
+            throw new TransactionException("TransactionResponse code is 0");
+        }
+        return rlpList;
+    }
+
 
     protected <T> RemoteCall<CallResponse<List<T>>> executeRemoteCallListValueReturn(Function function, Class<T> returnType) {
         return new RemoteCall<>(() -> executeCallListValueReturn(function, returnType));
@@ -163,6 +185,13 @@ public abstract class BaseContract extends ManagedTransaction {
             response.setCode(code);
             return response;
         }
+        if(BigInteger.class.isAssignableFrom(returnType)){
+            CallResponse<T> response = new CallResponse<>();
+            response.setCode(code);
+            JsonNode retNode = root.path("Ret");
+            response.setData((T) Numeric.toBigInt(retNode.textValue()));
+            return response;
+        }
         JavaType javaType = mapper.getTypeFactory().constructParametricType(CallResponse.class, returnType);
         return mapper.readValue(resultStr, javaType);
     }
@@ -185,6 +214,7 @@ public abstract class BaseContract extends ManagedTransaction {
         if (Strings.isBlank(result)) {
             throw new ContractCallException("Empty value (0x) returned from contract");
         }
+        System.out.println(new String(Numeric.hexStringToByteArray(result)));
         return new String(Numeric.hexStringToByteArray(result));
     }
 }

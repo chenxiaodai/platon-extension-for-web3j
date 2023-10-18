@@ -1,4 +1,4 @@
-package io.github.chenxiaodai.web3j.platon.enums;
+package io.github.chenxiaodai.web3j.platon.contracts.enums;
 
 import io.github.chenxiaodai.web3j.platon.utils.Bech32Utils;
 import lombok.Getter;
