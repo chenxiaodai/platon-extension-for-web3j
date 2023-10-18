@@ -51,8 +51,8 @@ public class StakingContract extends BaseContract {
 	/**
 	 * 加载合约, 默认ReadonlyTransactionManager事务管理
 	 * 
-	 * @param web3j
-	 * @return
+	 * @param web3j 客户端
+	 * @return staking合约
 	 */
     public static StakingContract load(Web3j web3j) {
         return new StakingContract(InnerContractEnum.STAKING_CONTRACT.getAddress(), web3j);
@@ -61,9 +61,9 @@ public class StakingContract extends BaseContract {
     /**
      * 加载合约
      * 
-     * @param web3j
-     * @param transactionManager
-     * @return
+     * @param web3j 客户端
+     * @param transactionManager 交易管理
+     * @return staking合约
      */
     public static StakingContract load(Web3j web3j, TransactionManager transactionManager) {
     	return new StakingContract(InnerContractEnum.STAKING_CONTRACT.getAddress(), web3j, transactionManager);
@@ -72,9 +72,10 @@ public class StakingContract extends BaseContract {
     /**
      * 加载合约, 默认RawTransactionManager事务管理
      * 
-     * @param web3j
-     * @param credentials
-     * @return
+     * @param web3j 客户端
+     * @param credentials 钱包
+     * @param chainId 链id
+     * @return staking合约
      */
     public static StakingContract load(Web3j web3j, Credentials credentials, long chainId) {
     	return new StakingContract(InnerContractEnum.STAKING_CONTRACT.getAddress(), web3j, credentials, chainId);
@@ -103,11 +104,12 @@ public class StakingContract extends BaseContract {
      * @param nodeName 被质押节点的名称(有长度限制，表示该节点的名称)
      * @param website 节点的第三方主页(有长度限制，表示该节点的主页)
      * @param details 节点的描述(有长度限制，表示该节点的描述)
+     * @param amount 质押金额
      * @param programVersion  程序的真实版本，治理rpc获取
      * @param programVersionSign 程序的真实版本签名，治理rpc获取
      * @param blsPubKey bls的公钥
      * @param blsProof bls的证明,通过拉取证明接口获取
-     * @return
+     * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> createStaking(String nodeId, CreateStakingAmountTypeEnum type, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details, BigInteger amount, BigInteger programVersion, String programVersionSign, String blsPubKey, String blsProof) {
         List<Type> param = Arrays.asList(
@@ -139,7 +141,7 @@ public class StakingContract extends BaseContract {
      * @param nodeName 被质押节点的名称(有长度限制，表示该节点的名称)
      * @param website 节点的第三方主页(有长度限制，表示该节点的主页)
      * @param details 节点的描述(有长度限制，表示该节点的描述)
-     * @return
+     * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> editCandidate(String nodeId, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details) {
         List<Type> param = Arrays.asList(
@@ -161,7 +163,7 @@ public class StakingContract extends BaseContract {
      * @param nodeId            被质押的节点Id(也叫候选人的节点Id)
      * @param type              表示使用账户自由金额还是账户的锁仓金额做质押，0: 自由金额； 1: 锁仓金额
      * @param amount            增持的von
-     * @return
+     * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> increaseStaking(String nodeId, IncreaseStakingAmountTypeEnum type, BigInteger amount) {
         List<Type> param = Arrays.asList(
@@ -177,7 +179,7 @@ public class StakingContract extends BaseContract {
      * 撤销质押(一次性发起全部撤销，多次到账)
      *
      * @param nodeId            被质押的节点Id(也叫候选人的节点Id)
-     * @return
+     * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> withdrewStaking(String nodeId) {
         List<Type> param = Arrays.asList(
@@ -193,7 +195,7 @@ public class StakingContract extends BaseContract {
      * @param nodeId            委托的节点Id
      * @param type              表示使用账户自由金额还是账户的锁仓金额做委托，0: 自由金额； 1: 锁仓金额  3:委托锁定金额
      * @param amount            委托的金额(按照最小单位算，1LAT = 10**18 von)
-     * @return
+     * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> delegate(String nodeId, DelegateAmountTypeEnum type, BigInteger amount) {
         List<Type> param = Arrays.asList(
@@ -211,7 +213,7 @@ public class StakingContract extends BaseContract {
      * @param nodeId            委托的节点Id
      * @param stakingBlockNum   代表着某个node的某次质押的唯一标识
      * @param amount            减持生效的委托的金额(按照最小单位算，1LAT = 10**18 von)
-     * @return
+     * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> withdrewDelegation(String nodeId, BigInteger stakingBlockNum, BigInteger amount) {
         List<Type> param = Arrays.asList(
@@ -226,7 +228,7 @@ public class StakingContract extends BaseContract {
     /**
      * 领取解锁的委托
      *
-     * @return
+     * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> redeemDelegation() {
         Function function = new Function(FUNC_REDEEM_DELEGATION);
@@ -236,9 +238,9 @@ public class StakingContract extends BaseContract {
     /**
      *  获得领取解锁的委托日志（当减持/撤销委托成功时调用）
      *
-     * @param transactionReceipt
-     * @return
-     * @throws TransactionException
+     * @param transactionReceipt 交易回执
+     * @return 领取详情
+     * @throws TransactionException 交易异常
      */
     public RedeemDelegation decodeRedeemDelegateLog(TransactionReceipt transactionReceipt) throws TransactionException {
         List<RlpType> rlpList = decodePPOSLog(transactionReceipt);
@@ -253,9 +255,9 @@ public class StakingContract extends BaseContract {
     /**
      *  获得解除委托时日志信息（当减持/撤销委托成功时调用）
      *
-     * @param transactionReceipt
-     * @return
-     * @throws TransactionException
+     * @param transactionReceipt 交易回执
+     * @return 解委托详情
+     * @throws TransactionException 交易异常
      */
     public UnDelegation decodeUnDelegateLog(TransactionReceipt transactionReceipt) throws TransactionException {
         List<RlpType> rlpList = decodePPOSLog(transactionReceipt);
@@ -278,7 +280,7 @@ public class StakingContract extends BaseContract {
     /**
      * 查询当前结算周期的验证人队列
      *
-     * @return
+     * @return 验证人列表
      */
     public RemoteCall<CallResponse<List<VerifierNode>>> getVerifierList() {
         Function function = new Function(FUNC_GET_VERIFIER_LIST);
@@ -288,7 +290,7 @@ public class StakingContract extends BaseContract {
     /**
      * 查询当前共识周期的验证人列表
      *
-     * @return
+     * @return 验证人列表
      */
     public RemoteCall<CallResponse<List<VerifierNode>>> getValidatorList() {
         Function function = new Function(FUNC_GET_VALIDATOR_LIST);
@@ -299,7 +301,7 @@ public class StakingContract extends BaseContract {
     /**
      * 查询所有实时的候选人列表
      *
-     * @return
+     * @return 候选人列表
      */
     public RemoteCall<CallResponse<List<CandidateNode>>> getCandidateList() {
         Function function = new Function(FUNC_GET_CANDIDATE_LIST);
@@ -310,7 +312,7 @@ public class StakingContract extends BaseContract {
      * 查询当前账户地址所委托的节点的NodeID和质押Id
      *
      * @param address 委托人的账户地址
-     * @return
+     * @return 用户委托关系
      */
     public RemoteCall<CallResponse<List<DelegationIdInfo>>> getRelatedListByDelAddr(String address) {
         List<Type> param = Arrays.asList(
@@ -326,7 +328,7 @@ public class StakingContract extends BaseContract {
      * @param nodeId 验证人的节点Id
      * @param stakingBlockNum 发起质押时的区块高度
      * @param delAddr 委托人账户地址
-     * @return
+     * @return 委托详情
      */
     public RemoteCall<CallResponse<Delegation>> getDelegateInfo(String nodeId, BigInteger stakingBlockNum, String delAddr) {
         List<Type> param = Arrays.asList(
@@ -341,8 +343,8 @@ public class StakingContract extends BaseContract {
     /**
      * 获取质押信息
      *
-     * @param nodeId
-     * @return
+     * @param nodeId 节点id
+     * @return 质押详情
      */
     public RemoteCall<CallResponse<CandidateNode>> getStakingInfo(String nodeId) {
         List<Type> param = Arrays.asList(
@@ -356,7 +358,7 @@ public class StakingContract extends BaseContract {
      * 查询账户处于锁定期与解锁期的委托信息
      *
      * @param delAddr 委托人账户地址
-     * @return
+     * @return 委托锁定信息
      */
     public RemoteCall<CallResponse<DelegationLockInfo>> getDelegationLockInfo(String delAddr) {
         List<Type> param = Arrays.asList(
@@ -369,7 +371,7 @@ public class StakingContract extends BaseContract {
     /**
      * 查询当前结算周期的区块奖励
      *
-     * @return
+     * @return 区块奖励
      */
     public RemoteCall<CallResponse<BigInteger>> getPackageReward() {
         Function function = new Function(FUNC_GET_PACKAGE_REWARD);
@@ -379,7 +381,7 @@ public class StakingContract extends BaseContract {
     /**
      * 查询当前结算周期的质押奖励
      *
-     * @return
+     * @return 质押奖励
      */
     public RemoteCall<CallResponse<BigInteger>> getStakingReward() {
         Function function = new Function(FUNC_GET_STAKING_REWARD);
@@ -390,7 +392,7 @@ public class StakingContract extends BaseContract {
     /**
      * 查询当前结算周期的质押奖励
      *
-     * @return
+     * @return 平均出块间隔
      */
     public RemoteCall<CallResponse<Integer>> getAvgPackTime() {
         Function function = new Function(FUNC_GET_AVG_PACK_TIME);
