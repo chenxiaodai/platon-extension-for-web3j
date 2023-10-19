@@ -31,15 +31,12 @@ import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.ReadonlyTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.exceptions.ContractCallException;
-import org.web3j.tx.response.EmptyTransactionReceipt;
 import org.web3j.utils.Numeric;
 import org.web3j.utils.Strings;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
-
-import static org.web3j.utils.RevertReasonExtractor.extractRevertReason;
 
 @Slf4j
 public abstract class BaseContract extends ManagedTransaction {
@@ -86,23 +83,6 @@ public abstract class BaseContract extends ManagedTransaction {
                                 "JsonRpcError thrown with code %d. Message: %s",
                                 error.getCode(), error.getMessage()));
             }
-        }
-
-        if (!(receipt instanceof EmptyTransactionReceipt)
-                && receipt != null
-                && !receipt.isStatusOK()) {
-            throw new TransactionException(
-                    String.format(
-                            "Transaction %s has failed with status: %s. "
-                                    + "Gas used: %s. "
-                                    + "Revert reason: '%s'.",
-                            receipt.getTransactionHash(),
-                            receipt.getStatus(),
-                            receipt.getGasUsedRaw() != null
-                                    ? receipt.getGasUsed().toString()
-                                    : "unknown",
-                            extractRevertReason(receipt, data, web3j, true, BigInteger.ZERO)),
-                    receipt);
         }
         return getResponseFromTransactionReceipt(receipt);
     }
@@ -175,7 +155,7 @@ public abstract class BaseContract extends ManagedTransaction {
         return mapper.readValue(resultStr, javaType);
     }
 
-
+    @SuppressWarnings("unchecked")
     private <T> CallResponse<T> executeCallSingleValueReturn(Function function, Class<T> returnType) throws IOException {
         String resultStr = ethCall(function);
         JsonNode root = mapper.readTree(resultStr);

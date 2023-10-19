@@ -114,7 +114,7 @@ public class StakingContract extends BaseContract {
     public RemoteCall<TransactionResponse> createStaking(String nodeId, CreateStakingAmountTypeEnum type, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details, BigInteger amount, BigInteger programVersion, String programVersionSign, String blsPubKey, String blsProof) {
         List<Type> param = Arrays.asList(
                 new UintType(type.getValue()),
-                    new HexStringType(benefitAddress),
+                new HexStringType(benefitAddress),
                 new HexStringType(nodeId),
                 new StringType(externalId),
                 new StringType(nodeName),
