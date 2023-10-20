@@ -12,6 +12,7 @@ import io.github.chenxiaodai.web3j.platon.contracts.type.HexStringType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.StringType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.Type;
 import io.github.chenxiaodai.web3j.platon.contracts.type.UintType;
+import io.github.chenxiaodai.web3j.platon.contracts.utils.PPOSFuncUtils;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
@@ -112,6 +113,14 @@ public class StakingContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> createStaking(String nodeId, CreateStakingAmountTypeEnum type, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details, BigInteger amount, BigInteger programVersion, String programVersionSign, String blsPubKey, String blsProof) {
+        return executeRemoteCallTransaction(getFunctionOfCreateStaking(nodeId, type, benefitAddress, rewardPer, externalId, nodeName, website, details, amount, programVersion, programVersionSign, blsPubKey, blsProof));
+    }
+
+    public static String encodeTransactionDataOfCreateStaking(String nodeId, CreateStakingAmountTypeEnum type, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details, BigInteger amount, BigInteger programVersion, String programVersionSign, String blsPubKey, String blsProof){
+        return PPOSFuncUtils.encode(getFunctionOfCreateStaking(nodeId, type, benefitAddress, rewardPer, externalId, nodeName, website, details, amount, programVersion, programVersionSign, blsPubKey, blsProof));
+    }
+
+    private static Function getFunctionOfCreateStaking(String nodeId, CreateStakingAmountTypeEnum type, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details, BigInteger amount, BigInteger programVersion, String programVersionSign, String blsPubKey, String blsProof){
         List<Type> param = Arrays.asList(
                 new UintType(type.getValue()),
                 new HexStringType(benefitAddress),
@@ -127,8 +136,7 @@ public class StakingContract extends BaseContract {
                 new HexStringType(blsPubKey),
                 new HexStringType(blsProof)
         );
-        Function function = new Function(FUNC_CREATE_STAKING, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_CREATE_STAKING, param);
     }
 
     /**
@@ -144,6 +152,14 @@ public class StakingContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> editCandidate(String nodeId, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details) {
+        return executeRemoteCallTransaction(getFunctionOfEditCandidate(nodeId, benefitAddress, rewardPer, externalId, nodeName, website, details));
+    }
+
+    public static String encodeTransactionDataOfEditCandidate(String nodeId, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details){
+        return PPOSFuncUtils.encode(getFunctionOfEditCandidate(nodeId, benefitAddress, rewardPer, externalId, nodeName, website, details));
+    }
+
+    private static Function getFunctionOfEditCandidate(String nodeId, String benefitAddress, BigInteger rewardPer, String externalId, String nodeName, String website, String details){
         List<Type> param = Arrays.asList(
                 new HexStringType(benefitAddress),
                 new HexStringType(nodeId),
@@ -153,8 +169,7 @@ public class StakingContract extends BaseContract {
                 new StringType(website),
                 new StringType(details)
         );
-        Function function = new Function(FUNC_EDIT_CANDIDATE, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_EDIT_CANDIDATE, param);
     }
 
     /**
@@ -166,13 +181,20 @@ public class StakingContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> increaseStaking(String nodeId, IncreaseStakingAmountTypeEnum type, BigInteger amount) {
+        return executeRemoteCallTransaction(getFunctionOfIncreaseStaking(nodeId, type, amount));
+    }
+
+    public static String encodeTransactionDataOfIncreaseStaking(String nodeId, IncreaseStakingAmountTypeEnum type, BigInteger amount){
+        return PPOSFuncUtils.encode(getFunctionOfIncreaseStaking(nodeId, type, amount));
+    }
+
+    private static Function getFunctionOfIncreaseStaking(String nodeId, IncreaseStakingAmountTypeEnum type, BigInteger amount){
         List<Type> param = Arrays.asList(
                 new HexStringType(nodeId),
                 new UintType(type.getValue()),
                 new UintType(amount)
         );
-        Function function = new Function(FUNC_INCREASE_STAKING, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_INCREASE_STAKING, param);
     }
 
     /**
@@ -182,11 +204,18 @@ public class StakingContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> withdrewStaking(String nodeId) {
+        return executeRemoteCallTransaction(getFunctionOfWithdrewStaking(nodeId));
+    }
+
+    public static String encodeTransactionDataOfWithdrewStaking(String nodeId){
+        return PPOSFuncUtils.encode(getFunctionOfWithdrewStaking(nodeId));
+    }
+
+    private static Function getFunctionOfWithdrewStaking(String nodeId){
         List<Type> param = Arrays.asList(
                 new HexStringType(nodeId)
         );
-        Function function = new Function(FUNC_WITHDREW_STAKING, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_WITHDREW_STAKING, param);
     }
 
     /**
@@ -198,13 +227,20 @@ public class StakingContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> delegate(String nodeId, DelegateAmountTypeEnum type, BigInteger amount) {
+        return executeRemoteCallTransaction(getFunctionOfDelegate(nodeId, type, amount));
+    }
+
+    public static String encodeTransactionDataOfDelegate(String nodeId, DelegateAmountTypeEnum type, BigInteger amount){
+        return PPOSFuncUtils.encode(getFunctionOfDelegate(nodeId, type, amount));
+    }
+
+    private static Function getFunctionOfDelegate(String nodeId, DelegateAmountTypeEnum type, BigInteger amount){
         List<Type> param = Arrays.asList(
                 new UintType(type.getValue()),
                 new HexStringType(nodeId),
                 new UintType(amount)
         );
-        Function function = new Function(FUNC_DELEGATE, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_DELEGATE, param);
     }
 
     /**
@@ -216,13 +252,20 @@ public class StakingContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> withdrewDelegation(String nodeId, BigInteger stakingBlockNum, BigInteger amount) {
+        return executeRemoteCallTransaction(getFunctionOfWithdrewDelegation(nodeId, stakingBlockNum, amount));
+    }
+
+    public static String encodeTransactionDataOfWithdrewDelegation(String nodeId, BigInteger stakingBlockNum, BigInteger amount){
+        return PPOSFuncUtils.encode(getFunctionOfWithdrewDelegation(nodeId, stakingBlockNum, amount));
+    }
+
+    private static Function getFunctionOfWithdrewDelegation(String nodeId, BigInteger stakingBlockNum, BigInteger amount){
         List<Type> param = Arrays.asList(
                 new UintType(stakingBlockNum),
                 new HexStringType(nodeId),
                 new UintType(amount)
         );
-        Function function = new Function(FUNC_WITHDREW_DELEGATION, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_WITHDREW_DELEGATION, param);
     }
 
     /**
@@ -231,8 +274,15 @@ public class StakingContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> redeemDelegation() {
-        Function function = new Function(FUNC_REDEEM_DELEGATION);
-        return executeRemoteCallTransaction(function);
+        return executeRemoteCallTransaction(getFunctionOfRedeemDelegation());
+    }
+
+    public static String encodeTransactionDataOfRedeemDelegation(){
+        return PPOSFuncUtils.encode(getFunctionOfRedeemDelegation());
+    }
+
+    private static Function getFunctionOfRedeemDelegation(){
+        return new Function(FUNC_REDEEM_DELEGATION);
     }
 
     /**
@@ -283,8 +333,15 @@ public class StakingContract extends BaseContract {
      * @return 验证人列表
      */
     public RemoteCall<CallResponse<List<VerifierNode>>> getVerifierList() {
-        Function function = new Function(FUNC_GET_VERIFIER_LIST);
-        return executeRemoteCallListValueReturn(function, VerifierNode.class);
+        return executeRemoteCallListValueReturn(getFunctionOfGetVerifierList(), VerifierNode.class);
+    }
+
+    public static String encodeTransactionDataOfGetVerifierList(){
+        return PPOSFuncUtils.encode(getFunctionOfGetVerifierList());
+    }
+
+    private static Function getFunctionOfGetVerifierList(){
+        return new Function(FUNC_GET_VERIFIER_LIST);
     }
 
     /**
@@ -293,10 +350,16 @@ public class StakingContract extends BaseContract {
      * @return 验证人列表
      */
     public RemoteCall<CallResponse<List<VerifierNode>>> getValidatorList() {
-        Function function = new Function(FUNC_GET_VALIDATOR_LIST);
-        return executeRemoteCallListValueReturn(function, VerifierNode.class);
+        return executeRemoteCallListValueReturn(getFunctionOfGetValidatorList(), VerifierNode.class);
     }
 
+    public static String encodeTransactionDataOfGetValidatorList(){
+        return PPOSFuncUtils.encode(getFunctionOfGetValidatorList());
+    }
+
+    private static Function getFunctionOfGetValidatorList(){
+        return new Function(FUNC_GET_VALIDATOR_LIST);
+    }
 
     /**
      * 查询所有实时的候选人列表
@@ -304,8 +367,15 @@ public class StakingContract extends BaseContract {
      * @return 候选人列表
      */
     public RemoteCall<CallResponse<List<CandidateNode>>> getCandidateList() {
-        Function function = new Function(FUNC_GET_CANDIDATE_LIST);
-        return executeRemoteCallListValueReturn(function, CandidateNode.class);
+        return executeRemoteCallListValueReturn(getFunctionOfGetCandidateList(), CandidateNode.class);
+    }
+
+    public static String encodeTransactionDataOfGetCandidateList(){
+        return PPOSFuncUtils.encode(getFunctionOfGetCandidateList());
+    }
+
+    private static Function getFunctionOfGetCandidateList(){
+        return new Function(FUNC_GET_CANDIDATE_LIST);
     }
 
     /**
@@ -315,11 +385,18 @@ public class StakingContract extends BaseContract {
      * @return 用户委托关系
      */
     public RemoteCall<CallResponse<List<DelegationIdInfo>>> getRelatedListByDelAddr(String address) {
+        return executeRemoteCallListValueReturn(getFunctionOfGetRelatedListByDelAddr(address), DelegationIdInfo.class);
+    }
+
+    public static String encodeTransactionDataOfGetRelatedListByDelAddr(String address){
+        return PPOSFuncUtils.encode(getFunctionOfGetRelatedListByDelAddr(address));
+    }
+
+    private static Function getFunctionOfGetRelatedListByDelAddr(String address){
         List<Type> param = Arrays.asList(
                 new HexStringType(address)
         );
-        Function function = new Function(FUNC_GET_RELATED_LIST_BY_DEL_ADDR, param);
-        return executeRemoteCallListValueReturn(function, DelegationIdInfo.class);
+        return new Function(FUNC_GET_RELATED_LIST_BY_DEL_ADDR, param);
     }
 
     /**
@@ -331,13 +408,20 @@ public class StakingContract extends BaseContract {
      * @return 委托详情
      */
     public RemoteCall<CallResponse<Delegation>> getDelegateInfo(String nodeId, BigInteger stakingBlockNum, String delAddr) {
+        return executeRemoteCallSingleValueReturn(getFunctionOfGetDelegateInfo(nodeId, stakingBlockNum, delAddr), Delegation.class);
+    }
+
+    public static String encodeTransactionDataOfGetDelegateInfo(String nodeId, BigInteger stakingBlockNum, String delAddr){
+        return PPOSFuncUtils.encode(getFunctionOfGetDelegateInfo(nodeId, stakingBlockNum, delAddr));
+    }
+
+    private static Function getFunctionOfGetDelegateInfo(String nodeId, BigInteger stakingBlockNum, String delAddr){
         List<Type> param = Arrays.asList(
                 new UintType(stakingBlockNum),
                 new HexStringType(delAddr),
                 new HexStringType(nodeId)
         );
-        Function function = new Function(FUNC_GET_DELEGATE_INFO, param);
-        return executeRemoteCallSingleValueReturn(function, Delegation.class);
+        return new Function(FUNC_GET_DELEGATE_INFO, param);
     }
 
     /**
@@ -347,11 +431,18 @@ public class StakingContract extends BaseContract {
      * @return 质押详情
      */
     public RemoteCall<CallResponse<CandidateNode>> getStakingInfo(String nodeId) {
+        return executeRemoteCallSingleValueReturn(getFunctionOfGetStakingInfo(nodeId), CandidateNode.class);
+    }
+
+    public static String encodeTransactionDataOfGetStakingInfo(String nodeId){
+        return PPOSFuncUtils.encode(getFunctionOfGetStakingInfo(nodeId));
+    }
+
+    private static Function getFunctionOfGetStakingInfo(String nodeId){
         List<Type> param = Arrays.asList(
                 new HexStringType(nodeId)
         );
-        Function function = new Function(FUNC_GET_CANDIDATE_INFO, param);
-        return executeRemoteCallSingleValueReturn(function, CandidateNode.class);
+        return new Function(FUNC_GET_CANDIDATE_INFO, param);
     }
 
     /**
@@ -361,11 +452,18 @@ public class StakingContract extends BaseContract {
      * @return 委托锁定信息
      */
     public RemoteCall<CallResponse<DelegationLockInfo>> getDelegationLockInfo(String delAddr) {
+        return executeRemoteCallSingleValueReturn(getFunctionOfGetDelegationLockInfo(delAddr), DelegationLockInfo.class);
+    }
+
+    public static String encodeTransactionDataOfGetDelegationLockInfo(String delAddr){
+        return PPOSFuncUtils.encode(getFunctionOfGetDelegationLockInfo(delAddr));
+    }
+
+    private static Function getFunctionOfGetDelegationLockInfo(String delAddr){
         List<Type> param = Arrays.asList(
                 new HexStringType(delAddr)
         );
-        Function function = new Function(FUNC_GET_DELEGATION_LOCK_INFO, param);
-        return executeRemoteCallSingleValueReturn(function, DelegationLockInfo.class);
+        return new Function(FUNC_GET_DELEGATION_LOCK_INFO, param);
     }
 
     /**
@@ -378,16 +476,30 @@ public class StakingContract extends BaseContract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
+    public static String encodeTransactionDataOfGetPackageReward(){
+        return PPOSFuncUtils.encode(getFunctionOfGetPackageReward());
+    }
+
+    private static Function getFunctionOfGetPackageReward(){
+        return new Function(FUNC_GET_PACKAGE_REWARD);
+    }
+
     /**
      * 查询当前结算周期的质押奖励
      *
      * @return 质押奖励
      */
     public RemoteCall<CallResponse<BigInteger>> getStakingReward() {
-        Function function = new Function(FUNC_GET_STAKING_REWARD);
-        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
+        return executeRemoteCallSingleValueReturn(getFunctionOfGetStakingReward(), BigInteger.class);
     }
 
+    public static String encodeTransactionDataOfGetStakingReward(){
+        return PPOSFuncUtils.encode(getFunctionOfGetStakingReward());
+    }
+
+    private static Function getFunctionOfGetStakingReward(){
+        return new Function(FUNC_GET_STAKING_REWARD);
+    }
 
     /**
      * 查询当前结算周期的质押奖励
@@ -395,7 +507,14 @@ public class StakingContract extends BaseContract {
      * @return 平均出块间隔
      */
     public RemoteCall<CallResponse<Integer>> getAvgPackTime() {
-        Function function = new Function(FUNC_GET_AVG_PACK_TIME);
-        return executeRemoteCallSingleValueReturn(function, Integer.class);
+        return executeRemoteCallSingleValueReturn(getFunctionOfGetAvgPackTime(), Integer.class);
+    }
+
+    public static String encodeTransactionDataOfGetAvgPackTime(){
+        return PPOSFuncUtils.encode(getFunctionOfGetAvgPackTime());
+    }
+
+    private static Function getFunctionOfGetAvgPackTime(){
+        return new Function(FUNC_GET_AVG_PACK_TIME);
     }
 }

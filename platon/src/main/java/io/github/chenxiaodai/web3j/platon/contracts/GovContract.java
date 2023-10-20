@@ -12,6 +12,7 @@ import io.github.chenxiaodai.web3j.platon.contracts.type.HexStringType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.StringType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.Type;
 import io.github.chenxiaodai.web3j.platon.contracts.type.UintType;
+import io.github.chenxiaodai.web3j.platon.contracts.utils.PPOSFuncUtils;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
@@ -91,13 +92,21 @@ public class GovContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> submitText(String nodeId, String pipId) {
+        return executeRemoteCallTransaction(getFunctionOfSubmitText(nodeId, pipId));
+    }
+
+    public static String encodeTransactionDataOfSubmitText(String nodeId, String pipId){
+        return PPOSFuncUtils.encode(getFunctionOfSubmitText(nodeId, pipId));
+    }
+
+    private static Function getFunctionOfSubmitText(String nodeId, String pipId){
         List<Type> param = Arrays.asList(
                 new HexStringType(nodeId),
                 new StringType(pipId)
         );
-        Function function = new Function(FUNC_SUBMIT_TEXT, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_SUBMIT_TEXT, param);
     }
+
 
     /**
      * 提交升级提案
@@ -109,14 +118,21 @@ public class GovContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> submitVersion(String nodeId, String pipId, BigInteger newVersion, BigInteger endVotingRounds) {
+        return executeRemoteCallTransaction(getFunctionOfSubmitVersion(nodeId, pipId, newVersion, endVotingRounds));
+    }
+
+    public static String encodeTransactionDataOfSubmitVersion(String nodeId, String pipId, BigInteger newVersion, BigInteger endVotingRounds){
+        return PPOSFuncUtils.encode(getFunctionOfSubmitVersion(nodeId, pipId, newVersion, endVotingRounds));
+    }
+
+    private static Function getFunctionOfSubmitVersion(String nodeId, String pipId, BigInteger newVersion, BigInteger endVotingRounds){
         List<Type> param = Arrays.asList(
                 new HexStringType(nodeId),
                 new StringType(pipId),
                 new UintType(newVersion),
                 new UintType(endVotingRounds)
         );
-        Function function = new Function(FUNC_SUBMIT_VERSION, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_SUBMIT_VERSION, param);
     }
 
     /**
@@ -130,6 +146,14 @@ public class GovContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> submitParam(String nodeId, String pipId, String module, String name, String newValue) {
+        return executeRemoteCallTransaction(getFunctionOfSubmitParam(nodeId, pipId, module, name, newValue));
+    }
+
+    public static String encodeTransactionDataOfSubmitParam(String nodeId, String pipId, String module, String name, String newValue){
+        return PPOSFuncUtils.encode(getFunctionOfSubmitParam(nodeId, pipId, module, name, newValue));
+    }
+
+    private static Function getFunctionOfSubmitParam(String nodeId, String pipId, String module, String name, String newValue){
         List<Type> param = Arrays.asList(
                 new HexStringType(nodeId),
                 new StringType(pipId),
@@ -137,8 +161,7 @@ public class GovContract extends BaseContract {
                 new StringType(name),
                 new StringType(newValue)
         );
-        Function function = new Function(FUNC_SUBMIT_PARAM, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_SUBMIT_PARAM, param);
     }
 
     /**
@@ -151,14 +174,21 @@ public class GovContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> submitCancel(String nodeId, String pipId, BigInteger endVotingRounds, String tobeCanceledProposalId) {
+        return executeRemoteCallTransaction(getFunctionOfSubmitCancel(nodeId, pipId, endVotingRounds, tobeCanceledProposalId));
+    }
+
+    public static String encodeTransactionDataOfSubmitCancel(String nodeId, String pipId, BigInteger endVotingRounds, String tobeCanceledProposalId){
+        return PPOSFuncUtils.encode(getFunctionOfSubmitCancel(nodeId, pipId, endVotingRounds, tobeCanceledProposalId));
+    }
+
+    private static Function getFunctionOfSubmitCancel(String nodeId, String pipId, BigInteger endVotingRounds, String tobeCanceledProposalId){
         List<Type> param = Arrays.asList(
                 new HexStringType(nodeId),
                 new StringType(pipId),
                 new UintType(endVotingRounds),
                 new HexStringType(tobeCanceledProposalId)
         );
-        Function function = new Function(FUNC_SUBMIT_CANCEL, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_SUBMIT_CANCEL, param);
     }
 
 
@@ -173,6 +203,14 @@ public class GovContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> vote(String nodeId, String proposalId, VoteOptionEnum option, BigInteger programVersion, String versionSign) {
+        return executeRemoteCallTransaction(getFunctionOfVote(nodeId, proposalId, option, programVersion, versionSign));
+    }
+
+    public static String encodeTransactionDataOfVote(String nodeId, String proposalId, VoteOptionEnum option, BigInteger programVersion, String versionSign){
+        return PPOSFuncUtils.encode(getFunctionOfVote(nodeId, proposalId, option, programVersion, versionSign));
+    }
+
+    private static Function getFunctionOfVote(String nodeId, String proposalId, VoteOptionEnum option, BigInteger programVersion, String versionSign){
         List<Type> param = Arrays.asList(
                 new HexStringType(nodeId),
                 new HexStringType(proposalId),
@@ -180,8 +218,7 @@ public class GovContract extends BaseContract {
                 new UintType(programVersion),
                 new HexStringType(versionSign)
         );
-        Function function = new Function(FUNC_VOTE, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_VOTE, param);
     }
 
     /**
@@ -193,13 +230,20 @@ public class GovContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> declareVersion(String nodeId, BigInteger programVersion, String versionSign) {
+        return executeRemoteCallTransaction(getFunctionOfDeclareVersion(nodeId, programVersion, versionSign));
+    }
+
+    public static String encodeTransactionDataOfDeclareVersion(String nodeId, BigInteger programVersion, String versionSign){
+        return PPOSFuncUtils.encode(getFunctionOfDeclareVersion(nodeId, programVersion, versionSign));
+    }
+
+    private static Function getFunctionOfDeclareVersion(String nodeId, BigInteger programVersion, String versionSign){
         List<Type> param = Arrays.asList(
                 new HexStringType(nodeId),
                 new UintType(programVersion),
                 new HexStringType(versionSign)
         );
-        Function function = new Function(FUNC_DECLARE_VERSION, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_DECLARE_VERSION, param);
     }
 
     /**
@@ -209,11 +253,18 @@ public class GovContract extends BaseContract {
      * @return 提案详情
      */
     public RemoteCall<CallResponse<Proposal>> getProposal(String proposalId) {
+        return executeRemoteCallSingleValueReturn(getFunctionOfGetProposal(proposalId), Proposal.class);
+    }
+
+    public static String encodeTransactionDataOfGetProposal(String proposalId){
+        return PPOSFuncUtils.encode(getFunctionOfGetProposal(proposalId));
+    }
+
+    private static Function getFunctionOfGetProposal(String proposalId){
         List<Type> param = Arrays.asList(
                 new HexStringType(proposalId)
         );
-        Function function = new Function(FUNC_GET_PROPOSAL, param);
-        return executeRemoteCallSingleValueReturn(function, Proposal.class);
+        return new Function(FUNC_GET_PROPOSAL, param);
     }
 
     /**
@@ -223,11 +274,18 @@ public class GovContract extends BaseContract {
      * @return 提案详情
      */
     public RemoteCall<CallResponse<TallyResult>> getTallyResult(String proposalId) {
+        return executeRemoteCallSingleValueReturn(getFunctionOfGetTallyResult(proposalId), TallyResult.class);
+    }
+
+    public static String encodeTransactionDataOfGetTallyResult(String proposalId){
+        return PPOSFuncUtils.encode(getFunctionOfGetTallyResult(proposalId));
+    }
+
+    private static Function getFunctionOfGetTallyResult(String proposalId){
         List<Type> param = Arrays.asList(
                 new HexStringType(proposalId)
         );
-        Function function = new Function(FUNC_GET_TALLY_RESULT, param);
-        return executeRemoteCallSingleValueReturn(function, TallyResult.class);
+        return new Function(FUNC_GET_TALLY_RESULT, param);
     }
 
     /**
@@ -236,8 +294,15 @@ public class GovContract extends BaseContract {
      * @return 提案列表
      */
     public RemoteCall<CallResponse<List<Proposal>>> listProposal() {
-        Function function = new Function(FUNC_LIST_PROPOSAL);
-        return executeRemoteCallListValueReturn(function, Proposal.class);
+        return executeRemoteCallListValueReturn(getFunctionOfListProposal(), Proposal.class);
+    }
+
+    public static String encodeTransactionDataOfListProposal(){
+        return PPOSFuncUtils.encode(getFunctionOfListProposal());
+    }
+
+    private static Function getFunctionOfListProposal(){
+        return new Function(FUNC_LIST_PROPOSAL);
     }
 
     /**
@@ -246,8 +311,15 @@ public class GovContract extends BaseContract {
      * @return 版本号
      */
     public RemoteCall<CallResponse<Long>> getActiveVersion() {
-        Function function = new Function(FUNC_GET_ACTIVE_VERSION);
-        return executeRemoteCallSingleValueReturn(function, Long.class);
+        return executeRemoteCallSingleValueReturn(getFunctionOfGetActiveVersion(), Long.class);
+    }
+
+    public static String encodeTransactionDataOfGetActiveVersion(){
+        return PPOSFuncUtils.encode(getFunctionOfGetActiveVersion());
+    }
+
+    private static Function getFunctionOfGetActiveVersion(){
+        return new Function(FUNC_GET_ACTIVE_VERSION);
     }
 
     /**
@@ -258,12 +330,19 @@ public class GovContract extends BaseContract {
      * @return 版本号
      */
     public RemoteCall<CallResponse<String>> getGovernParamValue(String module, String name) {
+        return executeRemoteCallSingleValueReturn(getFunctionOfGetGovernParamValue(module, name), String.class);
+    }
+
+    public static String encodeTransactionDataOfGetGovernParamValue(String module, String name){
+        return PPOSFuncUtils.encode(getFunctionOfGetGovernParamValue(module, name));
+    }
+
+    private static Function getFunctionOfGetGovernParamValue(String module, String name){
         List<Type> param = Arrays.asList(
                 new StringType(module),
                 new StringType(name)
         );
-        Function function = new Function(FUNC_GET_GOVERN_PARAM_VALUE, param);
-        return executeRemoteCallSingleValueReturn(function, String.class);
+        return new Function(FUNC_GET_GOVERN_PARAM_VALUE, param);
     }
 
     /**
@@ -274,12 +353,19 @@ public class GovContract extends BaseContract {
      * @return 版本号
      */
     public RemoteCall<CallResponse<List<Integer>>> getAccumulationVerifiersCount(String proposalId, String blockHash) {
+        return executeRemoteCallListValueReturn(getFunctionOfGetAccumulationVerifiersCount(proposalId, blockHash), Integer.class);
+    }
+
+    public static String encodeTransactionDataOfGetAccumulationVerifiersCount(String proposalId, String blockHash){
+        return PPOSFuncUtils.encode(getFunctionOfGetAccumulationVerifiersCount(proposalId, blockHash));
+    }
+
+    private static Function getFunctionOfGetAccumulationVerifiersCount(String proposalId, String blockHash){
         List<Type> param = Arrays.asList(
                 new HexStringType(proposalId),
                 new HexStringType(blockHash)
         );
-        Function function = new Function(FUNC_GET_ACCUMULATION_VERIFIERS_COUNT, param);
-        return executeRemoteCallListValueReturn(function, Integer.class);
+        return new Function(FUNC_GET_ACCUMULATION_VERIFIERS_COUNT, param);
     }
 
 
@@ -290,12 +376,18 @@ public class GovContract extends BaseContract {
      * @return 版本号
      */
     public RemoteCall<CallResponse<List<GovernParam>>> listGovernParam(String module) {
+        return executeRemoteCallListValueReturn(getFunctionOfListGovernParam(module), GovernParam.class);
+    }
+
+    public static String encodeTransactionDataOfListGovernParam(String module){
+        return PPOSFuncUtils.encode(getFunctionOfListGovernParam(module));
+    }
+
+    private static Function getFunctionOfListGovernParam(String module){
         List<Type> param = Arrays.asList(
                 new StringType(module)
         );
-        Function function = new Function(FUNC_LIST_GOVERN_PARAM, param);
-        return executeRemoteCallListValueReturn(function, GovernParam.class);
+        return new Function(FUNC_LIST_GOVERN_PARAM, param);
     }
-
 
 }
