@@ -64,15 +64,13 @@ public abstract class BaseContract extends ManagedTransaction {
     }
 
     private TransactionResponse executeTransaction(Function function) throws TransactionException, IOException {
-
-        TransactionReceipt receipt = null;
-        String data = PPOSFuncUtils.encode(function);
         try {
-
+            String data = PPOSFuncUtils.encode(function);
             Transaction transaction = Transaction.createEthCallTransaction(transactionManager.getFromAddress(), contractAddress, data);
-            receipt = send(contractAddress, data, BigInteger.ZERO, gasProvider.getGasPrice(function.getType()),
+            TransactionReceipt receipt = send(contractAddress, data, BigInteger.ZERO, gasProvider.getGasPrice(function.getType()),
                             gasProvider.getGasLimit(transaction),
                             false);
+            return getResponseFromTransactionReceipt(receipt);
         } catch (JsonRpcError error) {
 
             if (error.getData() != null) {
@@ -84,7 +82,7 @@ public abstract class BaseContract extends ManagedTransaction {
                                 error.getCode(), error.getMessage()));
             }
         }
-        return getResponseFromTransactionReceipt(receipt);
+
     }
 
     private TransactionResponse getResponseFromTransactionReceipt(TransactionReceipt transactionReceipt) throws TransactionException {

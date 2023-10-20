@@ -7,7 +7,7 @@ public enum DuplicateSignTypeEnum {
 
     PREPARE_BLOCK(1), PREPARE_VOTE(2),VIEW_CHANGE(3);
 
-    int value;
+    final int value;
 
     DuplicateSignTypeEnum(int val) {
         this.value = val;
