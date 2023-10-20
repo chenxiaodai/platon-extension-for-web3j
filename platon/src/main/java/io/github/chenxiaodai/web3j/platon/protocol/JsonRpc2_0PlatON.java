@@ -2,6 +2,7 @@ package io.github.chenxiaodai.web3j.platon.protocol;
 
 import io.github.chenxiaodai.web3j.platon.protocol.response.AdminProgramVersion;
 import io.github.chenxiaodai.web3j.platon.protocol.response.AdminBlsProof;
+import io.github.chenxiaodai.web3j.platon.protocol.response.PlatonEvidences;
 import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.admin.JsonRpc2_0Admin;
 import org.web3j.protocol.core.Request;
@@ -37,5 +38,14 @@ public class JsonRpc2_0PlatON extends JsonRpc2_0Admin implements PlatON {
                 Collections.<String>emptyList(),
                 web3jService,
                 AdminBlsProof.class);
+    }
+
+    @Override
+    public Request<?, PlatonEvidences> platonEvidences() {
+        return new Request<>(
+                "platon_evidences",
+                Collections.<String>emptyList(),
+                web3jService,
+                PlatonEvidences.class);
     }
 }
