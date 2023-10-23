@@ -2,13 +2,9 @@ package io.github.chenxiaodai.web3j.platon.contracts.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.chenxiaodai.web3j.platon.contracts.common.ErrorCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-@Getter
-@Setter
-@ToString
+@Data
 public class BaseResponse {
 
     @JsonProperty("Code")

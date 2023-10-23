@@ -95,9 +95,9 @@ public class RewardContract extends BaseContract {
     /**
      *  获得提取的明细（当提取账户当前所有的可提取的委托奖励成功时调用）
      *
-     * @param transactionReceipt
-     * @return
-     * @throws TransactionException
+     * @param transactionReceipt 交易回执
+     * @return 奖励信息
+     * @throws TransactionException 交易异常
      */
     public List<Reward> decodeWithdrawDelegateRewardLog(TransactionReceipt transactionReceipt) throws TransactionException {
         List<RlpType> rlpList  = decodePPOSLog(transactionReceipt);
@@ -119,7 +119,8 @@ public class RewardContract extends BaseContract {
     /**
      * 查询账户在各节点未提取委托奖励
      *
-     * @param account 锁仓释放到账账户
+     * @param account 委托的账号
+     * @param nodeList 委托的节点id列表
      * @return 提案列表
      */
     public RemoteCall<CallResponse<List<Reward>>> getDelegateReward(String account, List<String> nodeList) {
