@@ -9,6 +9,7 @@ import io.github.chenxiaodai.web3j.platon.contracts.enums.InnerContractEnum;
 import io.github.chenxiaodai.web3j.platon.contracts.type.HexStringType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.ListType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.Type;
+import io.github.chenxiaodai.web3j.platon.contracts.utils.PPOSFuncUtils;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
@@ -75,12 +76,19 @@ public class RestrictingContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> createRestrictingPlan(String account, List<RestrictingPlan> planList) {
+        return executeRemoteCallTransaction(getFunctionOfCreateRestrictingPlan(account, planList));
+    }
+
+    public static String encodeTransactionDataOfCreateRestrictingPlan(String account, List<RestrictingPlan> planList){
+        return PPOSFuncUtils.encode(getFunctionOfCreateRestrictingPlan(account, planList));
+    }
+
+    private static Function getFunctionOfCreateRestrictingPlan(String account, List<RestrictingPlan> planList){
         List<Type> param = Arrays.asList(
                 new HexStringType(account),
                 new ListType<>(planList)
         );
-        Function function = new Function(FUNC_CREATE_RESTRICTING_PLAN, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_CREATE_RESTRICTING_PLAN, param);
     }
 
     /**
@@ -90,10 +98,17 @@ public class RestrictingContract extends BaseContract {
      * @return 提案列表
      */
     public RemoteCall<CallResponse<RestrictingItem>> getRestrictingInfo(String account) {
+        return executeRemoteCallSingleValueReturn(getFunctionOfGetRestrictingInfo(account), RestrictingItem.class);
+    }
+
+    public static String encodeTransactionDataOfGetRestrictingInfo(String account){
+        return PPOSFuncUtils.encode(getFunctionOfGetRestrictingInfo(account));
+    }
+
+    private static Function getFunctionOfGetRestrictingInfo(String account){
         List<Type> param = Arrays.asList(
                 new HexStringType(account)
         );
-        Function function = new Function(FUNC_GET_RESTRICTING_INFO, param);
-        return executeRemoteCallSingleValueReturn(function, RestrictingItem.class);
+        return new Function(FUNC_GET_RESTRICTING_INFO, param);
     }
 }

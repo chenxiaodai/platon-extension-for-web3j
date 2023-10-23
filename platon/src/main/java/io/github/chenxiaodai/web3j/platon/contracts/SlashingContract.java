@@ -9,6 +9,7 @@ import io.github.chenxiaodai.web3j.platon.contracts.type.HexStringType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.StringType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.Type;
 import io.github.chenxiaodai.web3j.platon.contracts.type.UintType;
+import io.github.chenxiaodai.web3j.platon.contracts.utils.PPOSFuncUtils;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
@@ -77,12 +78,19 @@ public class SlashingContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> reportDuplicateSign(DuplicateSignTypeEnum type, String data) {
+        return executeRemoteCallTransaction(getFunctionOfReportDuplicateSign(type ,data));
+    }
+
+    public static String encodeTransactionDataOfReportDuplicateSign(DuplicateSignTypeEnum type, String data){
+        return PPOSFuncUtils.encode(getFunctionOfReportDuplicateSign(type ,data));
+    }
+
+    private static Function getFunctionOfReportDuplicateSign(DuplicateSignTypeEnum type, String data){
         List<Type> param = Arrays.asList(
                 new UintType(type.getValue()),
                 new StringType(data)
         );
-        Function function = new Function(FUNC_REPORT_DUPLICATE_SIGN, param);
-        return executeRemoteCallTransaction(function);
+        return new Function(FUNC_REPORT_DUPLICATE_SIGN, param);
     }
 
 
@@ -95,12 +103,19 @@ public class SlashingContract extends BaseContract {
      * @return 提案详情
      */
     public RemoteCall<CallResponse<String>> checkDuplicateSign(DuplicateSignTypeEnum type, String nodeId, BigInteger blockNumber) {
+        return executeRemoteCallSingleValueReturn(getFunctionOfCheckDuplicateSign(type ,nodeId, blockNumber), String.class);
+    }
+
+    public static String encodeTransactionDataOfCheckDuplicateSign(DuplicateSignTypeEnum type, String nodeId, BigInteger blockNumber){
+        return PPOSFuncUtils.encode(getFunctionOfCheckDuplicateSign(type ,nodeId, blockNumber));
+    }
+
+    private static Function getFunctionOfCheckDuplicateSign(DuplicateSignTypeEnum type, String nodeId, BigInteger blockNumber){
         List<Type> param = Arrays.asList(
                 new UintType(type.getValue()),
                 new HexStringType(nodeId),
                 new UintType(blockNumber)
         );
-        Function function = new Function(FUNC_CHECK_DUPLICATE_SIGN, param);
-        return executeRemoteCallSingleValueReturn(function, String.class);
+        return new Function(FUNC_CHECK_DUPLICATE_SIGN, param);
     }
 }

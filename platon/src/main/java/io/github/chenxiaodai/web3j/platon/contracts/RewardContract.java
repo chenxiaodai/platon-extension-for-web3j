@@ -1,20 +1,17 @@
 package io.github.chenxiaodai.web3j.platon.contracts;
 
-import io.github.chenxiaodai.web3j.platon.contracts.common.ErrorCode;
 import io.github.chenxiaodai.web3j.platon.contracts.common.Function;
 import io.github.chenxiaodai.web3j.platon.contracts.dto.CallResponse;
 import io.github.chenxiaodai.web3j.platon.contracts.dto.TransactionResponse;
-import io.github.chenxiaodai.web3j.platon.contracts.dto.req.RestrictingPlan;
-import io.github.chenxiaodai.web3j.platon.contracts.dto.resp.RestrictingItem;
 import io.github.chenxiaodai.web3j.platon.contracts.dto.resp.Reward;
 import io.github.chenxiaodai.web3j.platon.contracts.enums.InnerContractEnum;
 import io.github.chenxiaodai.web3j.platon.contracts.type.HexStringType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.ListType;
 import io.github.chenxiaodai.web3j.platon.contracts.type.Type;
+import io.github.chenxiaodai.web3j.platon.contracts.utils.PPOSFuncUtils;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
-import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.rlp.RlpDecoder;
@@ -22,7 +19,6 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpString;
 import org.web3j.rlp.RlpType;
 import org.web3j.tx.TransactionManager;
-import org.web3j.utils.Numeric;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,8 +81,15 @@ public class RewardContract extends BaseContract {
      * @return 返回交易回执信息
      */
     public RemoteCall<TransactionResponse> withdrawDelegateReward() {
-        Function function = new Function(FUNC_WITHDRAW_DELEGATE_REWARD);
-        return executeRemoteCallTransaction(function);
+        return executeRemoteCallTransaction(getFunctionOfWithdrawDelegateReward());
+    }
+
+    public static String encodeTransactionDataOfWithdrawDelegateReward(){
+        return PPOSFuncUtils.encode(getFunctionOfWithdrawDelegateReward());
+    }
+
+    private static Function getFunctionOfWithdrawDelegateReward(){
+        return new Function(FUNC_WITHDRAW_DELEGATE_REWARD);
     }
 
     /**
@@ -120,11 +123,18 @@ public class RewardContract extends BaseContract {
      * @return 提案列表
      */
     public RemoteCall<CallResponse<List<Reward>>> getDelegateReward(String account, List<String> nodeList) {
+        return executeRemoteCallListValueReturn(getFunctionOfGetDelegateReward(account, nodeList), Reward.class);
+    }
+
+    public static String encodeTransactionDataOfGetDelegateReward(String account, List<String> nodeList){
+        return PPOSFuncUtils.encode(getFunctionOfGetDelegateReward(account, nodeList));
+    }
+
+    private static Function getFunctionOfGetDelegateReward(String account, List<String> nodeList){
         List<Type> param = Arrays.asList(
                 new HexStringType(account),
                 new ListType<>(nodeList.stream().map(HexStringType::new).collect(Collectors.toList()))
         );
-        Function function = new Function(FUNC_GET_DELEGATE_REWARD, param);
-        return executeRemoteCallListValueReturn(function, Reward.class);
+        return new Function(FUNC_GET_DELEGATE_REWARD, param);
     }
 }
