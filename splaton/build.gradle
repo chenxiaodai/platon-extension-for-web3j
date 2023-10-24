@@ -1,0 +1,5 @@
+description 'platon special node extentsion web3j'
+
+dependencies {
+    api project(':platon')
+}

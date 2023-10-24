@@ -10,3 +10,4 @@
 
 rootProject.name = 'platon-extension-for-web3j'
 include('platon')
+include('splaton')
