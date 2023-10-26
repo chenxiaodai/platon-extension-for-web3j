@@ -18,7 +18,7 @@ pWeb3j作为PlatON的sdk, 依赖于Web3j，提供PlatON网络特有的支持。�
    - contracts包: 内置合约的支持，包括与合约交互，合约交易数据编码等
    - utils包: 包括lat格式地址转换，区块中节点id计算等
 
-2. splaton模块,用于对SPlatON节点特有协议的支持
+2. splaton模块依赖于platon模块, 用于对SPlatON节点特有协议的支持
 
 pWeb3j项目仅仅依赖于Web3j
 
@@ -30,14 +30,14 @@ Maven
 <dependency>
   <groupId>io.github.chenxiaodai.web3j</groupId>
   <artifactId>platon</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
 </dependency>
 ```
 
 Gradle
 
 ```groovy
-implementation ('io.github.chenxiaodai.web3j:platon:0.0.2')
+implementation ('io.github.chenxiaodai.web3j:platon:0.0.3')
 ```
 
 # 使用简介
