@@ -1,15 +1,15 @@
 # pWeb3j(platon extension for web3j)
 
-PlatON网络是一个以太坊兼容网络，除了以太坊的标准接口外，还有自己特有的东西。
+[PlatON](https://github.com/PlatONnetwork/PlatON-Go)网络是一个以太坊兼容网络，除了以太坊的标准接口外，还有自己特有的东西。
 
 - 新增rpc协议
 - 内置合约, 区别于solidity合约，存在自己的编解码。
 - 特点的地址格式展示
 - wasm合约支持
 
-SPlatON节点区别于PlatON节点，增加了经济模型历史数据保存及查询功能，交易账号批量查询接口，主用用于区块链浏览器
+[SPlatON](https://github.com/PlatONnetwork/PlatON-Go/tree/special-platon-develop)节点区别于PlatON节点，增加了经济模型历史数据保存及查询功能，交易账号批量查询接口，主用用于区块链浏览器
 
-Web3j是连接以太坊使用比较多的sdk。主要用于java 和 android语言的开发。
+[Web3j](https://github.com/web3j/web3j)是连接以太坊使用比较多的sdk。主要用于java 和 android语言的开发。
 
 pWeb3j作为PlatON的sdk, 依赖于Web3j，提供PlatON网络特有的支持。目前主要功能模块如下
 
