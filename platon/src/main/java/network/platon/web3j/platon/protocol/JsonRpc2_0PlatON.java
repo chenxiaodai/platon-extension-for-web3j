@@ -2,6 +2,7 @@ package network.platon.web3j.platon.protocol;
 
 import network.platon.web3j.platon.protocol.response.AdminProgramVersion;
 import network.platon.web3j.platon.protocol.response.AdminBlsProof;
+import network.platon.web3j.platon.protocol.response.DebugEconomicConfig;
 import network.platon.web3j.platon.protocol.response.PlatonEvidences;
 import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.admin.JsonRpc2_0Admin;
@@ -47,5 +48,14 @@ public class JsonRpc2_0PlatON extends JsonRpc2_0Admin implements PlatON {
                 Collections.<String>emptyList(),
                 web3jService,
                 PlatonEvidences.class);
+    }
+
+    @Override
+    public Request<?, DebugEconomicConfig> getEconomicConfig() {
+        return new Request<>(
+                "debug_economicConfig",
+                Collections.<String>emptyList(),
+                web3jService,
+                DebugEconomicConfig.class);
     }
 }
