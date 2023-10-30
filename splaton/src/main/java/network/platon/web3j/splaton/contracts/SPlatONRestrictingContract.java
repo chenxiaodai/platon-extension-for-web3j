@@ -69,6 +69,8 @@ public class SPlatONRestrictingContract extends RestrictingContract {
 
     /**
      * 批量查询账号余额
+     * @param addresses 地址列表，使用逗号分隔
+     * @return 账号详情列表
      */
     public RemoteCall<CallResponse<List<Balance>>> batchGetBalance(String addresses) {
         return executeRemoteCallListValueReturn(getFunctionOfBatchGetBalance(addresses), Balance.class);

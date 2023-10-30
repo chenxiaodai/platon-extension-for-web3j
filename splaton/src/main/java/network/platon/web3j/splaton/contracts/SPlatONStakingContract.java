@@ -79,7 +79,8 @@ public class SPlatONStakingContract extends StakingContract {
     /**
      * 查询历史结算周期的验证人队列
      *
-     * @return 验证人列表
+     * @param blockNumber 对应块高
+     * @return 历史验证人列表
      */
     public RemoteCall<CallResponse<List<VerifierNode>>> getHistoryVerifierList(BigInteger blockNumber) {
         return executeRemoteCallListValueReturn(getFunctionOfGetHistoryVerifierList(blockNumber), VerifierNode.class);
@@ -97,8 +98,8 @@ public class SPlatONStakingContract extends StakingContract {
 
     /**
      * 查询当前共识周期的验证人列表
-     *
-     * @return 验证人列表
+     * @param blockNumber 对应块高
+     * @return 历史验证人列表
      */
     public RemoteCall<CallResponse<List<VerifierNode>>> getHistoryValidatorList(BigInteger blockNumber) {
         return executeRemoteCallListValueReturn(getFunctionOfGetHistoryValidatorList(blockNumber), VerifierNode.class);
@@ -132,8 +133,8 @@ public class SPlatONStakingContract extends StakingContract {
 
     /**
      * 查询结算周期信息
-     *
-     * @return 验证人列表
+     * @param blockNumber 对应块高
+     * @return 结算信息列表
      */
     public RemoteCall<CallResponse<EpochInfo>> getEpochInfo(BigInteger blockNumber) {
         return executeRemoteCallSingleValueReturn(getFunctionOfGetEpochInfo(blockNumber), EpochInfo.class);
@@ -151,8 +152,8 @@ public class SPlatONStakingContract extends StakingContract {
 
     /**
      * 查询惩罚的节点列表
-     *
-     * @return 验证人列表
+     * @param blockNumber 对应块高
+     * @return 惩罚的列表
      */
     public RemoteCall<CallResponse<List<HistoryLowRateSlash>>> getHistorySlashList(BigInteger blockNumber) {
         return executeRemoteCallListValueReturn(getFunctionOfGetHistorySlashList(blockNumber), HistoryLowRateSlash.class);
@@ -170,8 +171,8 @@ public class SPlatONStakingContract extends StakingContract {
 
     /**
      * 查询内置合约调用列表
-     *
-     * @return 验证人列表
+     * @param blockNumber 对应块高
+     * @return 合约调用信息列表
      */
     public RemoteCall<CallResponse<List<PPosInvokeContractInput>>> getInnerContractCallList(BigInteger blockNumber) {
         return executeRemoteCallListValueReturn(getFunctionOfGetInnerContractCallList(blockNumber), PPosInvokeContractInput.class);
