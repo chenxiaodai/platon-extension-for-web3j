@@ -81,16 +81,16 @@ public class StakingContract extends BaseContract {
     public static StakingContract load(Web3j web3j, Credentials credentials, long chainId) {
     	return new StakingContract(InnerContractEnum.STAKING_CONTRACT.getAddress(), web3j, credentials, chainId);
     }
-    
-    private StakingContract(String contractAddress, Web3j web3j) {
+
+    protected StakingContract(String contractAddress, Web3j web3j) {
         super(contractAddress, web3j);
     }
 
-    private StakingContract(String contractAddress, Web3j web3j, Credentials credentials, long chainId) {
+    protected StakingContract(String contractAddress, Web3j web3j, Credentials credentials, long chainId) {
         super(contractAddress, web3j, credentials, chainId);
     }
 
-    private StakingContract(String contractAddress, Web3j web3j, TransactionManager transactionManager) {
+    protected StakingContract(String contractAddress, Web3j web3j, TransactionManager transactionManager) {
         super(contractAddress, web3j, transactionManager);
     }
 

@@ -63,15 +63,15 @@ public class RewardContract extends BaseContract {
     	return new RewardContract(InnerContractEnum.DELEGATE_REWARD_CONTRACT.getAddress(), web3j, credentials, chainId);
     }
 
-    private RewardContract(String contractAddress, Web3j web3j) {
+    protected RewardContract(String contractAddress, Web3j web3j) {
         super(contractAddress, web3j);
     }
 
-    private RewardContract(String contractAddress, Web3j web3j, Credentials credentials, long chainId) {
+    protected RewardContract(String contractAddress, Web3j web3j, Credentials credentials, long chainId) {
         super(contractAddress, web3j, credentials, chainId);
     }
 
-    private RewardContract(String contractAddress, Web3j web3j, TransactionManager transactionManager) {
+    protected RewardContract(String contractAddress, Web3j web3j, TransactionManager transactionManager) {
         super(contractAddress, web3j, transactionManager);
     }
 

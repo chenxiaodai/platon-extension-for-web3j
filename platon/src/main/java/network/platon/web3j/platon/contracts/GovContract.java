@@ -72,15 +72,15 @@ public class GovContract extends BaseContract {
     	return new GovContract(InnerContractEnum.GOV_CONTRACT.getAddress(), web3j, credentials, chainId);
     }
 
-    private GovContract(String contractAddress, Web3j web3j) {
+    protected GovContract(String contractAddress, Web3j web3j) {
         super(contractAddress, web3j);
     }
 
-    private GovContract(String contractAddress, Web3j web3j, Credentials credentials, long chainId) {
+    protected GovContract(String contractAddress, Web3j web3j, Credentials credentials, long chainId) {
         super(contractAddress, web3j, credentials, chainId);
     }
 
-    private GovContract(String contractAddress, Web3j web3j, TransactionManager transactionManager) {
+    protected GovContract(String contractAddress, Web3j web3j, TransactionManager transactionManager) {
         super(contractAddress, web3j, transactionManager);
     }
 
