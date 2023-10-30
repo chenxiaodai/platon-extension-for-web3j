@@ -30,14 +30,14 @@ Maven
 <dependency>
   <groupId>io.github.chenxiaodai.web3j</groupId>
   <artifactId>platon</artifactId>
-  <version>0.0.3</version>
+  <version>0.0.4</version>
 </dependency>
 ```
 
 Gradle
 
 ```groovy
-implementation ('io.github.chenxiaodai.web3j:platon:0.0.3')
+implementation ('io.github.chenxiaodai.web3j:platon:0.0.4')
 ```
 
 # 使用简介
