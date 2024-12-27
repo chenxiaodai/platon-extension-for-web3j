@@ -1,6 +1,7 @@
 package network.platon.web3j.platon.contracts.utils;
 
 import network.platon.web3j.platon.contracts.enums.CreateStakingAmountTypeEnum;
+import network.platon.web3j.platon.contracts.enums.DelegateAmountTypeEnum;
 import network.platon.web3j.platon.contracts.enums.IncreaseStakingAmountTypeEnum;
 import org.bouncycastle.util.encoders.Hex;
 import org.web3j.rlp.*;
@@ -13,6 +14,22 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
 public class PPOSCodecUtils {
+
+    public static Tuple3<BigInteger, String, BigInteger> decodeInputOfWithdrewDelegation(String input) {
+        RlpList rootList = (RlpList) RlpDecoder.decode(Hex.decode(input.replace("0x", ""))).getValues().get(0);
+        BigInteger stakingBlockNum = getBigInteger(rootList, 1);
+        String nodeId = getHex(rootList, 2);
+        BigInteger amount = getBigInteger(rootList, 3);
+        return new Tuple3<>(stakingBlockNum, nodeId, amount);
+    }
+
+    public static Tuple3<String, DelegateAmountTypeEnum, BigInteger> decodeInputOfDelegate(String input) {
+        RlpList rootList = (RlpList) RlpDecoder.decode(Hex.decode(input.replace("0x", ""))).getValues().get(0);
+        String nodeId = getHex(rootList, 2);
+        DelegateAmountTypeEnum type = DelegateAmountTypeEnum.fromValue(getBigInteger(rootList, 1).intValue());
+        BigInteger amount = getBigInteger(rootList, 3);
+        return new Tuple3<>(nodeId, type, amount);
+    }
 
     public static Tuple3<String, IncreaseStakingAmountTypeEnum, BigInteger> decodeInputOfIncreaseStaking(String input) {
         RlpList rootList = (RlpList) RlpDecoder.decode(Hex.decode(input.replace("0x", ""))).getValues().get(0);
