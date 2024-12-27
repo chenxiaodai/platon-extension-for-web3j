@@ -18,7 +18,7 @@ public enum DelegateAmountTypeEnum {
             return BALANCE;
         } else if (val == 1) {
             return RESTRICTING;
-        } else if (val == 2) {
+        } else if (val == 3) {
             return DELEGATE_LOCK;
         }
         throw new IllegalArgumentException();
