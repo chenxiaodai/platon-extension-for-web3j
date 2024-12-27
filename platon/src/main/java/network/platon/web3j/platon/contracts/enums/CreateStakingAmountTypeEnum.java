@@ -12,4 +12,15 @@ public enum CreateStakingAmountTypeEnum {
     CreateStakingAmountTypeEnum(int val) {
         this.value = val;
     }
+
+    public static CreateStakingAmountTypeEnum fromValue(int val) {
+        if (val == 0) {
+            return FREE_AMOUNT_TYPE;
+        } else if (val == 1) {
+            return RESTRICTING_AMOUNT_TYPE;
+        } else if (val == 2) {
+            return AUTO_AMOUNT_TYPE;
+        }
+        throw new IllegalArgumentException();
+    }
 }
