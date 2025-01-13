@@ -50,4 +50,5 @@ docs/build
 **/.settings
 **/bin
 
-platon-extension-for-web3j.asc
+/.jreleaser/
+/.key/

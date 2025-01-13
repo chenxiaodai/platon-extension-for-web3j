@@ -1,5 +1,6 @@
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+apply plugin: 'tech.medivh.plugin.publisher'
 
 task javadocsJar(type: Jar) {
     archiveClassifier = 'javadoc'
@@ -50,13 +51,5 @@ publishing {
                 }
             }
         }
-    }
-}
-
-signing {
-    sign publishing.publications.maven
-    def signingKey = new File("$rootDir/platon-extension-for-web3j.asc")
-    if (signingKey.exists()) {
-        useInMemoryPgpKeys(signingKey.getText('UTF-8'), System.getenv('GPG_PASSPHRASE'))
     }
 }
